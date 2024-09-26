@@ -1,24 +1,55 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from "./logo.svg";
+import "./App.css";
+import BasicTable from "./ReusableComponents/BasicTable";
+
+const header = [
+  {
+    key: "title",
+    label: "Title",
+    type: "text",
+    subType: "",
+    minWidth: 280
+
+  },
+  {
+    key: "inputFile",
+    label: "Input File",
+    type: "audio",
+    subType: "",
+    minWidth: 10
+  },
+  {
+    key: "fileType",
+    label: "File Type",
+    type: "text",
+    subType: "",
+    minWidth: 30
+  },
+];
+
+const body = [
+  {
+    title: "Ram",
+    inputFile: ".mp3",
+    fileType: ".mp4",
+  },
+  {
+    title: "Sample Audio", // Added title to maintain consistency
+    inputFile: ".mp3",
+    fileType: "", // Optional, can be left empty
+  },
+  {
+    title: "Another Sample", // Added title to maintain consistency
+    inputFile: "", // Optional, can be left empty
+    fileType: ".mp4",
+  },
+];
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <BasicTable header={header} body={body} />
+    </>
   );
 }
 
