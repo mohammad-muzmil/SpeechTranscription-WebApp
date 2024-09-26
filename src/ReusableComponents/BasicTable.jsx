@@ -14,25 +14,32 @@ const BasicTable = ({ header, body }) => {
         <TableHead>
           <TableRow>
             {header.map((column) => (
-              <TableCell key={column.key} align="left">
-                {column.label}
-              </TableCell>
+              <>
+                {console.log(column, "column")}
+                <TableCell
+                  key={column.key}
+                  align="left"
+                  style={{ minWidth: column.minWidth }}
+                >
+                  {column.label}
+                </TableCell>
+              </>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
           {body.map((row) => (
-            <TableRow
-              key={row.id}
-              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-            >
-                {console.log(row)}
-              {header.map((column) => (
-                <TableCell key={column.key} align="left">
-                  {row[column.key]}
-                </TableCell>
-              ))}
-            </TableRow>
+            <>
+              {console.log(row, "row")}
+              <TableRow key={row}>
+                {header.map((column) => (
+                  <TableCell key={column.id} align="left">
+                    {row[column.key] ? row[column.key] : "-"}
+                    {/* {console.log(row[column.key], "row[column.id]")} */}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </>
           ))}
         </TableBody>
       </Table>
