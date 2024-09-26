@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import './ListingScreen.css'; // Import the CSS file for styling
 import logoPng from './../assets/images/logo.png'
 import BasicTable from '../ReusableComponents/BasicTable';
-import FileUploadIcon from '@mui/icons-material/FileUpload';
+import { Icon } from '@iconify/react';
+
 function ListingScreen() {
 
     const [active, setActive] = useState('upload');
@@ -92,7 +93,8 @@ function ListingScreen() {
                                 className={`option ${active === 'upload' ? 'active' : ''}`}
                                 onClick={() => handleToggle('upload')}
                             >
-                                <FileUploadIcon /> Upload
+                                <Icon icon="mdi:home" width="24" height="24" />
+                                Upload
                             </div>
                             <div
                                 className={`option ${active === 'record' ? 'active' : ''}`}
