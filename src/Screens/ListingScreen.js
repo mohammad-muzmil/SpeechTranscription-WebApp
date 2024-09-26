@@ -108,7 +108,7 @@ function ListingScreen() {
 
     const metaInformation = {
         requiredSerialNumber: true,
-        paginatedSerialNumber: true,
+        paginatedSerialNumber: false,
         paginationMetaData: {
             count: 10,
             page: 1
