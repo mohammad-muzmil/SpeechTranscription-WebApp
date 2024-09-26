@@ -8,22 +8,21 @@ const header = [
     label: "Title",
     type: "text",
     subType: "",
-    minWidth: 280
-
+    minWidth: 280,
   },
   {
     key: "inputFile",
     label: "Input File",
     type: "audio",
     subType: "",
-    minWidth: 10
+    minWidth: 10,
   },
   {
     key: "fileType",
     label: "File Type",
     type: "text",
     subType: "",
-    minWidth: 30
+    minWidth: 30,
   },
 ];
 
@@ -45,10 +44,26 @@ const body = [
   },
 ];
 
+const actions = [
+  {
+    key:"edit",
+    label: "Edit",
+    icon: "basil:edit-outline",
+    color: "black",
+  },
+  {
+    key:"delete",
+    label: "Delete",
+    icon: "fluent:delete-28-regular",
+    color: "red",
+  },
+  {},
+];
+
 function App() {
   return (
     <>
-      <BasicTable header={header} body={body} />
+      <BasicTable header={header} body={body} actions={actions} />
     </>
   );
 }
