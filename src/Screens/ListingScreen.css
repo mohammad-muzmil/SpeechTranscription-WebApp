@@ -39,13 +39,15 @@
 .headerSubTitle {
     font-size: 24px;
     font-weight: 400;
+    margin-bottom: 0;
 }
 
 .headerContent {
-    width: 100%;
+    width: 70%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin: auto;
 }
 
 .centerRuler {
@@ -116,4 +118,54 @@
 .option.active {
     color: #fff;
     /* Highlight color for active option */
+}
+
+.recordSectionContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 40px 0;
+
+}
+
+.childSection {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.uploadSection {
+    background-color: white;
+    border: 2px dashed #ccc;
+    border-radius: 30px;
+    padding: 10px;
+}
+
+.uploaderContentSection {
+    font-size: 16px;
+    font-weight: 700;
+    padding: 16px 0;
+}
+
+.browseButtonStyle {
+    color: #0560FD;
+    text-decoration: underline;
+
+}
+
+.uploaderMutedText {
+    font-size: 12px;
+    font-weight: 400;
+    color: #676767;
+    padding: 10px 0;
+
+}
+
+.uploadIconHolder {
+    padding: 16px 0 0px;
+
 }
