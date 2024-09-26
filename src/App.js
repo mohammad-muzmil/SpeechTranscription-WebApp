@@ -1,24 +1,46 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from "./logo.svg";
+import "./App.css";
+import BasicTable from "./ReusableComponents/BasicTable";
 
+const header = [
+  {
+    key: "title",
+    label: "Title",
+    type: "text",
+    subType: "",
+  },
+  {
+    key: "inputFile",
+    label: "Input File",
+    type: "audio",
+    subType: "",
+  },
+  {
+    key: "fileType",
+    label: "File Type",
+    type: "text",
+    subType: "",
+  },
+];
+const body = [
+  {
+    id: "title",
+    title: "Sample Data",
+  },
+  {
+    id: "inputFile",
+    title: "ram",
+  },
+  {
+    id: "fileType",
+    title: "Sample Data",
+  },
+];
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <BasicTable header={header} body={body} />
+    </>
   );
 }
 
