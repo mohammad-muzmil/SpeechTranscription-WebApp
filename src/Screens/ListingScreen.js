@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './ListingScreen.css'; // Import the CSS file for styling
 import logoPng from './../assets/images/logo.png'
 import BasicTable from '../ReusableComponents/BasicTable';
-
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 function ListingScreen() {
 
+    const [active, setActive] = useState('upload');
+
+    const handleToggle = (option) => {
+        setActive(option);
+    };
 
     const header = [
         {
@@ -73,8 +78,30 @@ function ListingScreen() {
                 <div className='headerContent'>
 
                     <p className='headerTitle'>Speech Transcription and Real-Time Processing</p>
-
                     <div className='centerRuler'></div>
+                    <p className='headerSubTitle'>What would you like to do?</p>
+
+
+
+                    <div className="slider-container">
+                        <div className={`slider ${active}`} onClick={() => handleToggle(active === 'upload' ? 'record' : 'upload')}>
+                            <div className="toggle" />
+                        </div>
+                        <div className="options">
+                            <div
+                                className={`option ${active === 'upload' ? 'active' : ''}`}
+                                onClick={() => handleToggle('upload')}
+                            >
+                                <FileUploadIcon /> Upload
+                            </div>
+                            <div
+                                className={`option ${active === 'record' ? 'active' : ''}`}
+                                onClick={() => handleToggle('record')}
+                            >
+                                Record
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
 
