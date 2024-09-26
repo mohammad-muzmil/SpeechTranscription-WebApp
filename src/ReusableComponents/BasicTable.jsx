@@ -7,6 +7,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Icon } from "@iconify/react";
+import { Box } from "@mui/material";
 const BasicTable = ({ header, body, actions }) => {
   const headerStyles = {
     color: "#000000",
@@ -50,20 +51,28 @@ const BasicTable = ({ header, body, actions }) => {
               {" "}
               {/* Use a unique identifier */}
               {header.map((column) => (
-                <TableCell key={column.key} align="left" sx={bodyStyles}>
-                  {row[column.key] ? row[column.key] : "-"}
-                </TableCell>
+                <>
+                  <TableCell key={column.key} align="left" sx={bodyStyles}>
+                    {row[column.key] ? row[column.key] : "-"}
+                  </TableCell>
+                  {console.log(row[column.key], "row[column.key]")}
+                </>
               ))}
               {actions && actions.length > 0 && (
                 <TableCell align="left">
-                  {actions.map((action) => (
-                    <Icon
-                      icon={action?.icon}
-                      width="24"
-                      height="24"
-                      color={action.color}
-                    />
-                  ))}
+                  <Box display="flex" gap={1}>
+                    {" "}
+                    {/* You can adjust the gap value as needed */}
+                    {actions.map((action) => (
+                      <Icon
+                        key={action.key} // Ensure each icon has a unique key
+                        icon={action?.icon}
+                        width="24"
+                        height="24"
+                        color={action.color}
+                      />
+                    ))}
+                  </Box>
                 </TableCell>
               )}
             </TableRow>

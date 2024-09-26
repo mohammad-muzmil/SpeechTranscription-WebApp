@@ -18,7 +18,7 @@ function ListingScreen() {
             label: "Title",
             type: "text",
             subType: "",
-            minWidth: 280
+            // minWidth: 280
 
         },
         {
@@ -26,42 +26,42 @@ function ListingScreen() {
             label: "Input File",
             type: "icon",
             subType: "voice_wave",
-            minWidth: 30
+            // minWidth: 30
         },
         {
             key: "fileType",
             label: "File Type",
             type: "text",
             subType: "",
-            minWidth: 30
+            // minWidth: 30
         },
         {
             key: "outputFile",
             label: "Output File",
             type: "text",
             subType: "",
-            minWidth: 30
+            // minWidth: 30
         },
         {
             key: "duration",
             label: "Duration",
             type: "text",
             subType: "",
-            minWidth: 30
+            // minWidth: 30
         },
         {
             key: "date&time",
             label: "Date & Time",
             type: "date&time",
             subType: "",
-            minWidth: 30
+            // minWidth: 30
         },
         {
             key: "play",
             label: "Play",
             type: "play",
             subType: "",
-            minWidth: 30
+            // minWidth: 30
         },
        
     ];
@@ -71,25 +71,37 @@ function ListingScreen() {
             title: "New Recording",
             inputFile: ".mp3",
             fileType: ".mp4",
+            outputFile:"Hi! its a new audio recording...",
+            duration:"00:10",
+            "date&time":"23/09/2024  17:40",
+            play:"",
         },
         {
             title: "Sample Audio", // Added title to maintain consistency
             inputFile: ".mp3",
             fileType: "", // Optional, can be left empty
+            outputFile:"Hi! its a new audio recording...",
+            duration:"00:10",
+            "date&time":"23/09/2024  17:40",
+            play:"",
         },
         {
             title: "Another Sample", // Added title to maintain consistency
             inputFile: "", // Optional, can be left empty
             fileType: ".mp4",
+            outputFile:"Hi! its a new audio recording...",
+            duration:"00:10",
+            "date&time":"23/09/2024  17:40",
+            play:"",
         },
     ];
 
     const actions = [
         {
-            key: "edit",
-            label: "Edit",
-            icon: "basil:edit-outline",
-            color: "black",
+            key: "download",
+            label: "Download",
+            icon: "ri:download-fill",
+            color: "#0560FD",
         },
         {
             key: "delete",
