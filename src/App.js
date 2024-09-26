@@ -8,21 +8,22 @@ const header = [
     label: "Title",
     type: "text",
     subType: "",
-    minWidth: 280,
+    minWidth: 280
+
   },
   {
     key: "inputFile",
     label: "Input File",
     type: "audio",
     subType: "",
-    minWidth: 10,
+    minWidth: 10
   },
   {
     key: "fileType",
     label: "File Type",
     type: "text",
     subType: "",
-    minWidth: 30,
+    minWidth: 30
   },
 ];
 
