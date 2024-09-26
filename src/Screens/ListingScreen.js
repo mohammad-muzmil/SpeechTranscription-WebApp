@@ -5,6 +5,7 @@ import BasicTable from '../ReusableComponents/BasicTable';
 
 function ListingScreen() {
 
+
     const header = [
         {
             key: "title",
@@ -48,6 +49,21 @@ function ListingScreen() {
         },
     ];
 
+    const actions = [
+        {
+            key: "edit",
+            label: "Edit",
+            icon: "basil:edit-outline",
+            color: "black",
+        },
+        {
+            key: "delete",
+            label: "Delete",
+            icon: "fluent:delete-28-regular",
+            color: "red",
+        },
+        {},
+    ];
     return (
         <div className="container">
             <div className="top-section">
@@ -69,7 +85,7 @@ function ListingScreen() {
                 {/* The remaining 60% section */}
                 {/* <p>This is the bottom section.</p> */}
 
-                <BasicTable header={header} body={body} />
+                <BasicTable header={header} body={body} actions={actions} />
             </div>
         </div>
     );
