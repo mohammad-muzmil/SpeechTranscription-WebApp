@@ -63,7 +63,7 @@ function ListingScreen() {
             subType: "",
             minWidth: 30
         },
-       
+
     ];
 
     const body = [
@@ -105,6 +105,15 @@ function ListingScreen() {
         // },
         {},
     ];
+
+    const metaInformation = {
+        requiredSerialNumber: true,
+        paginatedSerialNumber: false,
+        paginationMetaData: {
+            count: 10,
+            page: 1
+        }
+    }
     return (
         <div className="container">
             <div className="top-section">
@@ -180,7 +189,7 @@ function ListingScreen() {
                 {/* The remaining 60% section */}
                 {/* <p>This is the bottom section.</p> */}
 
-                <BasicTable header={header} body={body} actions={actions} />
+                <BasicTable header={header} body={body} actions={actions} metaData={metaInformation} />
             </div>
         </div>
     );
