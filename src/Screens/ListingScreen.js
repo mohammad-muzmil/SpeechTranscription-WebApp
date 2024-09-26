@@ -24,9 +24,9 @@ function ListingScreen() {
         {
             key: "inputFile",
             label: "Input File",
-            type: "audio",
-            subType: "",
-            minWidth: 10
+            type: "icon",
+            subType: "voice_wave",
+            minWidth: 30
         },
         {
             key: "fileType",
@@ -35,11 +35,40 @@ function ListingScreen() {
             subType: "",
             minWidth: 30
         },
+        {
+            key: "outputFile",
+            label: "Output File",
+            type: "text",
+            subType: "",
+            minWidth: 30
+        },
+        {
+            key: "duration",
+            label: "Duration",
+            type: "text",
+            subType: "",
+            minWidth: 30
+        },
+        {
+            key: "date&time",
+            label: "Date & Time",
+            type: "date&time",
+            subType: "",
+            minWidth: 30
+        },
+        {
+            key: "play",
+            label: "Play",
+            type: "play",
+            subType: "",
+            minWidth: 30
+        },
+       
     ];
 
     const body = [
         {
-            title: "Ram",
+            title: "New Recording",
             inputFile: ".mp3",
             fileType: ".mp4",
         },
@@ -68,6 +97,12 @@ function ListingScreen() {
             icon: "fluent:delete-28-regular",
             color: "red",
         },
+        // {
+        //     key: "delete",
+        //     label: "Delete",
+        //     icon: "arcticons:music-party",
+        //     color: "red",
+        // },
         {},
     ];
     return (

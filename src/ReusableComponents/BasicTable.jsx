@@ -6,8 +6,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Button } from "@mui/material";
-import DownloadIcon from '@mui/icons-material/Download';
+import { Icon } from "@iconify/react";
 const BasicTable = ({ header, body, actions }) => {
   const headerStyles = {
     color: "#000000",
@@ -58,18 +57,12 @@ const BasicTable = ({ header, body, actions }) => {
               {actions && actions.length > 0 && (
                 <TableCell align="left">
                   {actions.map((action) => (
-                    <Button
-                      key={action.key}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        color: action.color,
-                      }}
-                    >
-                      {/* Replace this with your icon rendering logic if you have icons */}
-                      {action.label}
-                    </Button>
+                    <Icon
+                      icon={action?.icon}
+                      width="24"
+                      height="24"
+                      color={action.color}
+                    />
                   ))}
                 </TableCell>
               )}
