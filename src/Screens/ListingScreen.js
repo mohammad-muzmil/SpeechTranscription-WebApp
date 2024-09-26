@@ -115,28 +115,59 @@ function ListingScreen() {
 
                     <p className='headerTitle'>Speech Transcription and Real-Time Processing</p>
                     <div className='centerRuler'></div>
-                    <p className='headerSubTitle'>What would you like to do?</p>
+
+                    <div className='recordSectionContainer'>
+
+                        <div className='childSection'>
 
 
 
-                    <div className="slider-container">
-                        <div className={`slider ${active}`} onClick={() => handleToggle(active === 'upload' ? 'record' : 'upload')}>
-                            <div className="toggle" />
+                            <p className='headerSubTitle'>What would you like to do?</p>
+
+
+
+                            <div className="slider-container">
+                                <div className={`slider ${active}`} onClick={() => handleToggle(active === 'upload' ? 'record' : 'upload')}>
+                                    <div className="toggle" />
+                                </div>
+                                <div className="options">
+                                    <div
+                                        className={`option ${active === 'upload' ? 'active' : ''}`}
+                                        onClick={() => handleToggle('upload')}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Icon icon="jam:upload" width="30" height="30" style={{ marginRight: '8px' }} />
+
+                                            <span style={{ fontSize: '16px' }}>Upload</span>
+                                        </div>
+                                    </div>
+                                    <div
+                                        className={`option ${active === 'record' ? 'active' : ''}`}
+                                        onClick={() => handleToggle('record')}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Icon icon="material-symbols:mic" width="28" height="28" style={{ marginRight: '8px' }} />
+                                            <span style={{ fontSize: '16px' }}>Record</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="options">
-                            <div
-                                className={`option ${active === 'upload' ? 'active' : ''}`}
-                                onClick={() => handleToggle('upload')}
-                            >
-                                <Icon icon="mdi:home" width="24" height="24" />
-                                Upload
+                        <div className='childSection uploadSection'>
+
+
+
+
+                            <div className='uploadIconHolder'>
+
+                                <Icon icon="solar:cloud-upload-outline" style={{ fontSize: '65px', color: '#0560FD' }}></Icon>
                             </div>
-                            <div
-                                className={`option ${active === 'record' ? 'active' : ''}`}
-                                onClick={() => handleToggle('record')}
-                            >
-                                Record
+
+                            <div className='uploaderContentSection'>
+                                Drag & drop files or <span className='browseButtonStyle'>Browse</span>
                             </div>
+
+                            <span className='uploaderMutedText'>Limit 200mb per file. Supported formats: .wav, .mp3, .m4a, .mp4 </span>
                         </div>
                     </div>
                 </div>
