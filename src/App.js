@@ -45,11 +45,26 @@ const body = [
   },
 ];
 
+const actions = [
+  {
+    key:"edit",
+    label: "Edit",
+    icon: "basil:edit-outline",
+    color: "black",
+  },
+  {
+    key:"delete",
+    label: "Delete",
+    icon: "fluent:delete-28-regular",
+    color: "red",
+  },
+  {},
+];
+
 function App() {
   return (
     <>
-      <p>Hi</p>
-      <BasicTable header={header} body={body} />
+      <BasicTable header={header} body={body} actions={actions} />
     </>
   );
 }
