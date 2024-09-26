@@ -48,6 +48,7 @@ const body = [
 function App() {
   return (
     <>
+      <p>Hi</p>
       <BasicTable header={header} body={body} />
     </>
   );
