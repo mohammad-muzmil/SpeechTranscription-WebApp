@@ -8,6 +8,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Icon } from "@iconify/react";
 import { Box, Tooltip } from "@mui/material";
+import ReactAudioPlayer from "react-audio-player";
 
 const BasicTable = ({ header, body, actions, metaData }) => {
   const headerStyles = {
@@ -70,6 +71,7 @@ const BasicTable = ({ header, body, actions, metaData }) => {
               {/* Use a unique identifier */}
               {header.map((column) => (
                 <>
+
                   <TableCell
                     key={column.key}
                     align="left"
@@ -82,30 +84,81 @@ const BasicTable = ({ header, body, actions, metaData }) => {
                       // })
                     }}
                   >
-                    <div style={{
 
-                      display: 'flex',
-                      alignItems: 'end',
-                      flexDirection: 'row'
+                    {column?.type === 'text' && (
 
-                    }}>
+                      <div style={{
 
-                      {column?.icon_key && row?.[column?.icon_key]?.icon_name && (
-                        <Icon
-                          icon={row?.[column?.icon_key]?.icon_name}
-                          style={{
-                            marginRight: '10px',
-                            ...(row?.[column?.icon_key]?.styles || {})
-                          }}
-                          cursor="pointer"
-                        />
-                      )}
+                        display: 'flex',
+                        alignItems: 'end',
+                        flexDirection: 'row'
 
-                      {!column?.noText &&
+                      }}>
+
+                        {column?.icon_key && row?.[column?.icon_key]?.icon_name && (
+                          <Icon
+                            icon={row?.[column?.icon_key]?.icon_name}
+                            style={{
+                              marginRight: '10px',
+                              ...(row?.[column?.icon_key]?.styles || {})
+                            }}
+                            cursor="pointer"
+                          />
+                        )}
+
+                        {!column?.noText &&
 
 
-                        (<p style={{ padding: 0, margin: 0 }}>                      {row[column.key] ? row[column.key] : "-"}
-                        </p>)}      </div>
+                          (<p style={{ padding: 0, margin: 0 }}>                      {row[column.key] ? row[column.key] : "-"}
+                          </p>)}      </div>
+                    )
+
+                    }
+
+                    {column?.type === 'audio' && (
+
+                      // <ReactAudioPlayer src="https://commondatastorage.googleapis.com/codeskulptor-assets/Collision8-Bit.ogg" autoPlay controls style={{ backgroundColor: 'transparent' }} // Remove background color
+                      // />
+                      <audio controls
+                        style={{
+                          backgroundColor: 'transparent', // Make the audio background transparent
+                          height: '30px', // Adjust height to minimize space
+                          width: '300px', // Set width as needed
+                          outline: 'none', // Remove outline
+                        }}>
+                        <source src="https://commondatastorage.googleapis.com/codeskulptor-assets/Collision8-Bit.ogg" type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                      </audio>
+                    )}
+
+
+                    {column?.type === 'dateAndtime' && (
+
+                      <div style={{
+
+                        display: 'flex',
+                        alignItems: 'end',
+                        flexDirection: 'row'
+
+                      }}>
+
+                        {column?.icon_key && row?.[column?.icon_key]?.icon_name && (
+                          <Icon
+                            icon={row?.[column?.icon_key]?.icon_name}
+                            style={{
+                              marginRight: '10px',
+                              ...(row?.[column?.icon_key]?.styles || {})
+                            }}
+                            cursor="pointer"
+                          />
+                        )}
+
+                        {!column?.noText &&
+
+
+                          (<p style={{ padding: 0, margin: 0 }}>                      {row[column.key] ? row[column.key] : "-"}
+                          </p>)}      </div>
+                    )}
 
                   </TableCell>
 
