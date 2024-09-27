@@ -45,6 +45,7 @@ const initialState = {
       key: "play",
       label: "Play",
       type: "play",
+      play:"play",
       subType: "",
     },
   ],
@@ -56,7 +57,10 @@ const initialState = {
       outputFile: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
-      play: "",
+      // play: {
+      //   url:"https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
+      //   type:".mp3"
+      // },
       input_file: {
         icon_name: "bi:soundwave",
         input_file_url: '',

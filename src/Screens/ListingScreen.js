@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./ListingScreen.css"; // Import the CSS file for styling
 import logoPng from "./../assets/images/logo.png";
 import BasicTable from "../ReusableComponents/BasicTable";
@@ -200,7 +200,11 @@ function ListingScreen() {
             </div>
             {active === "upload" ? (
               <div>
-                <ReactAudioPlayer src="my_audio_file.ogg" autoPlay controls />
+                <ReactAudioPlayer
+                  src="https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav"
+                  autoPlay
+                  controls
+                />
               </div>
             ) : (
               // <div className="childSection uploadSection" >
