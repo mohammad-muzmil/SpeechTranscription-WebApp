@@ -4,7 +4,8 @@ import logoPng from "./../assets/images/logo.png";
 import BasicTable from "../ReusableComponents/BasicTable";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
-
+import { Grid2, Typography } from "@mui/material";
+import ReactAudioPlayer from "react-audio-player";
 function ListingScreen() {
   const [active, setActive] = useState("upload");
 
@@ -127,7 +128,7 @@ function ListingScreen() {
 
   const { header, body, actions } = useSelector((state) => state.data);
   const dispatch = useDispatch();
-
+  const recorder = (e) => {};
   return (
     <div className="container">
       <div className="top-section">
@@ -197,23 +198,69 @@ function ListingScreen() {
                 </div>
               </div>
             </div>
-            <div className="childSection uploadSection">
-              <div className="uploadIconHolder">
-                <Icon
-                  icon="solar:cloud-upload-outline"
-                  style={{ fontSize: "65px", color: "#0560FD" }}
-                ></Icon>
+            {active === "upload" ? (
+              <div>
+                <ReactAudioPlayer src="my_audio_file.ogg" autoPlay controls />
               </div>
+            ) : (
+              // <div className="childSection uploadSection" >
+              //   <div className="uploadIconHolder">
+              //     <Icon
+              //       icon="solar:cloud-upload-outline"
+              //       style={{ fontSize: "65px", color: "#0560FD" }}
+              //     ></Icon>
+              //   </div>
 
-              <div className="uploaderContentSection">
-                Drag & drop files or{" "}
-                <span className="browseButtonStyle">Browse</span>
-              </div>
+              //   <div className="uploaderContentSection">
+              //     Drag & drop files or{" "}
+              //     <span className="browseButtonStyle">Browse</span>
+              //   </div>
 
-              <span className="uploaderMutedText">
-                Limit 200mb per file. Supported formats: .wav, .mp3, .m4a, .mp4{" "}
-              </span>
-            </div>
+              //   <span className="uploaderMutedText">
+              //     Limit 200mb per file. Supported formats: .wav, .mp3, .m4a,
+              //     .mp4{" "}
+              //   </span>
+
+              // </div>
+              <Grid2
+                container
+                spacing={2}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  width: "40%",
+                  padding: "16px", // Added padding for spacing
+                  backgroundColor: "#F3F4F6", // Background color similar to the image
+                  border: "2px solid #E0E0E0", // Light gray border
+                  borderRadius: "16px", // Adjusted for rounded corners
+                  boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", // Soft shadow
+                }}
+              >
+                <Grid2 item size={2}>
+                  <div
+                    style={{
+                      borderRadius: "50%",
+                      borderWidth: "2px",
+                      borderColor: "blue", // Change this to any color you prefer
+                      overflow: "hidden",
+                    }}
+                  >
+                    <Icon
+                      icon="material-symbols:mic"
+                      style={{ fontSize: "65px", color: "white" }}
+                    ></Icon>
+                  </div>
+                </Grid2>
+                <Grid2 item size={10} sx={{ color: "#8E8E8E" }}>
+                  <Typography variant="h6">Record Speech</Typography>
+                  <Typography>To record your Speech,</Typography>
+                  <Typography style={{ marginTop: "8px" }}>
+                    click on the <span>blue button</span>.
+                  </Typography>
+                </Grid2>
+              </Grid2>
+            )}
           </div>
         </div>
 
