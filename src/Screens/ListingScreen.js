@@ -62,8 +62,7 @@ function ListingScreen() {
             type: "play",
             subType: "",
             minWidth: 30
-        },
-
+        }
     ];
 
     const body = [
