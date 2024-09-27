@@ -141,7 +141,22 @@
     align-items: center;
 }
 
+.childSectionRecord {
+    width: 50%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .uploadSection {
+    background-color: white;
+    border: 2px dashed #ccc;
+    border-radius: 30px;
+    padding: 10px;
+}
+
+.recordSection {
     background-color: white;
     border: 2px dashed #ccc;
     border-radius: 30px;
