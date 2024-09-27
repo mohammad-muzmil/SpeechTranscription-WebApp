@@ -22,10 +22,10 @@ const BasicTable = ({ header, body, actions, metaData }) => {
   const empty_space = "  ";
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} sx={{ boxShadow: 'none', border: 'none' }}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
-          <TableRow>
+          <TableRow sx={{ borderBottom: '1.5px solid #BCD4FF' }}>
             {metaData.requiredSerialNumber && (
               <TableCell align="left" style={headerStyles}>
                 S.No
@@ -52,7 +52,7 @@ const BasicTable = ({ header, body, actions, metaData }) => {
         </TableHead>
         <TableBody>
           {body.map((row, index) => (
-            <TableRow key={row[header[0].key]}>
+            <TableRow key={row[header[0].key]} sx={{ borderBottom: '1.5px solid #BCD4FF' }}>
               {metaData.requiredSerialNumber && (
                 <TableCell align="left" style={bodyStyles}>
                   {metaData?.paginatedSerialNumber &&
