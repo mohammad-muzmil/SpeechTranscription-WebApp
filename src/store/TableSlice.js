@@ -12,7 +12,7 @@ const initialState = {
     {
       key: "inputFile",
       label: "Input File",
-      type: "icon",
+      type: "text",
       subType: "voice_wave",
       icon_key: "input_file",
       noText: true
@@ -36,16 +36,15 @@ const initialState = {
       subType: "",
     },
     {
-      key: "date&time",
+      key: "dateAndtime",
       label: "Date & Time",
-      type: "date&time",
+      type: "dateAndtime",
       subType: "",
     },
     {
       key: "play",
       label: "Play",
-      type: "play",
-      play:"play",
+      type: "audio",
       subType: "",
     },
   ],
