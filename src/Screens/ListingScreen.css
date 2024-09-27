@@ -3,6 +3,7 @@
     /* Full height of the viewport */
     display: flex;
     flex-direction: column;
+    padding: auto 5%;
 }
 
 .top-section {
@@ -12,18 +13,20 @@
     background-size: cover;
     /* Cover the entire section */
     background-position: center;
-    padding: 1%;
+    padding: 0 5%;
     /* align-items: center; */
     /* Center the image */
 }
 
 .bottom-section {
     /* height: 50%; */
-    background-color: #f0f0f0;
+    background-color: white;
     /* Add any background color for the bottom section */
     display: flex;
     justify-content: center;
     align-items: center;
+
+    padding: 0 5%;
 }
 
 .logo {
