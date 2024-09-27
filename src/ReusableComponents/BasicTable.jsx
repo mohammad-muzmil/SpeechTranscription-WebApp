@@ -8,6 +8,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Icon } from "@iconify/react";
 import { Box, Tooltip } from "@mui/material";
+
 const BasicTable = ({ header, body, actions, metaData }) => {
   const headerStyles = {
     color: "#000000",
