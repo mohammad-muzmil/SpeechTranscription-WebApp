@@ -5,7 +5,6 @@ import BasicTable from "../ReusableComponents/BasicTable";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
 import { Grid2, Typography } from "@mui/material";
-import ReactAudioPlayer from "react-audio-player";
 function ListingScreen() {
   const [active, setActive] = useState("record");
 

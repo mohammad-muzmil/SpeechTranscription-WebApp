@@ -8,7 +8,6 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Icon } from "@iconify/react";
 import { Box, Tooltip } from "@mui/material";
-import ReactAudioPlayer from "react-audio-player";
 
 const BasicTable = ({ header, body, actions, metaData }) => {
   const headerStyles = {
@@ -19,20 +18,18 @@ const BasicTable = ({ header, body, actions, metaData }) => {
   const bodyStyles = {
     color: "#494949",
     fontSize: "14px",
-    lineHeight: "unset",
+    lineHeight: 'unset',
     padding: 1.5,
     fontWeight: 300,
+
   };
   const empty_space = "  ";
 
   return (
-    <TableContainer
-      component={Paper}
-      sx={{ boxShadow: "none", border: "none" }}
-    >
+    <TableContainer component={Paper} sx={{ boxShadow: 'none', border: 'none' }}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
-          <TableRow sx={{ borderBottom: "1.5px solid #BCD4FF" }}>
+          <TableRow sx={{ borderBottom: '1.5px solid #BCD4FF' }}>
             {metaData.requiredSerialNumber && (
               <TableCell align="left" style={headerStyles}>
                 S.No
@@ -59,17 +56,14 @@ const BasicTable = ({ header, body, actions, metaData }) => {
         </TableHead>
         <TableBody>
           {body.map((row, index) => (
-            <TableRow
-              key={row[header[0].key]}
-              sx={{ borderBottom: "1.5px solid #BCD4FF" }}
-            >
+            <TableRow key={row[header[0].key]} sx={{ borderBottom: '1.5px solid #BCD4FF' }}>
               {metaData.requiredSerialNumber && (
                 <TableCell align="left" style={bodyStyles}>
                   {metaData?.paginatedSerialNumber &&
-                  metaData?.paginationMetaData
+                    metaData?.paginationMetaData
                     ? (metaData.paginationMetaData.page - 1) *
-                        metaData.paginationMetaData.count +
-                      (index + 1)
+                    metaData.paginationMetaData.count +
+                    (index + 1)
                     : index + 1}
                 </TableCell>
               )}{" "}
@@ -171,17 +165,14 @@ const BasicTable = ({ header, body, actions, metaData }) => {
                 </>
               ))}
               {actions && actions.length > 0 && (
-                <TableCell
-                  align="left"
-                  sx={{
-                    ...bodyStyles,
-                    ...{ borderBottom: 0 },
-                    // ...(column?.icon_key && row?.[column?.icon_key]?.icon_name && {
+                <TableCell align="left" sx={{
+                  ...bodyStyles,
+                  ...{ borderBottom: 0 },
+                  // ...(column?.icon_key && row?.[column?.icon_key]?.icon_name && {
 
-                    //   // justifyContent: 'start'
-                    // })
-                  }}
-                >
+                  //   // justifyContent: 'start'
+                  // })
+                }}>
                   <Box display="flex" gap={1}>
                     {" "}
                     {/* You can adjust the gap value as needed */}
