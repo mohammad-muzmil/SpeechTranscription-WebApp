@@ -8,6 +8,10 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Icon } from "@iconify/react";
 import { Box, Tooltip } from "@mui/material";
+<<<<<<< HEAD
+=======
+
+>>>>>>> b1e23b6e18fd9d4353286dc9b890169700ce06e4
 const BasicTable = ({ header, body, actions, metaData }) => {
   const headerStyles = {
     color: "#000000",
@@ -16,8 +20,11 @@ const BasicTable = ({ header, body, actions, metaData }) => {
   };
   const bodyStyles = {
     color: "#494949",
-    fontSize: "12px",
+    fontSize: "14px",
+    lineHeight: 'unset',
+    padding: 1.5,
     fontWeight: 300,
+
   };
   const empty_space = "  ";
 
@@ -56,24 +63,84 @@ const BasicTable = ({ header, body, actions, metaData }) => {
               {metaData.requiredSerialNumber && (
                 <TableCell align="left" style={bodyStyles}>
                   {metaData?.paginatedSerialNumber &&
+<<<<<<< HEAD
                   metaData?.paginationMetaData
                     ? (metaData.paginationMetaData.page - 1) *
                         metaData.paginationMetaData.count +
                       (index + 1)
+=======
+                    metaData?.paginationMetaData
+                    ? (metaData.paginationMetaData.page - 1) *
+                    metaData.paginationMetaData.count +
+                    (index + 1)
+>>>>>>> b1e23b6e18fd9d4353286dc9b890169700ce06e4
                     : index + 1}
                 </TableCell>
               )}{" "}
               {/* Use a unique identifier */}
               {header.map((column) => (
                 <>
+<<<<<<< HEAD
                   <TableCell key={column.key} align="left" sx={bodyStyles}>
                     {row[column.key] ? row[column.key] : "-"}
                   </TableCell>
+=======
+                  <TableCell
+                    key={column.key}
+                    align="left"
+                    sx={{
+                      ...bodyStyles,
+                      ...{ borderBottom: 0 },
+                      // ...(column?.icon_key && row?.[column?.icon_key]?.icon_name && {
+
+                      //   // justifyContent: 'start'
+                      // })
+                    }}
+                  >
+                    <div style={{
+
+                      display: 'flex',
+                      alignItems: 'end',
+                      flexDirection: 'row'
+
+                    }}>
+
+                      {column?.icon_key && row?.[column?.icon_key]?.icon_name && (
+                        <Icon
+                          icon={row?.[column?.icon_key]?.icon_name}
+                          style={{
+                            marginRight: '10px',
+                            ...(row?.[column?.icon_key]?.styles || {})
+                          }}
+                          cursor="pointer"
+                        />
+                      )}
+
+                      {!column?.noText &&
+
+
+                        (<p style={{ padding: 0, margin: 0 }}>                      {row[column.key] ? row[column.key] : "-"}
+                        </p>)}      </div>
+
+                  </TableCell>
+
+>>>>>>> b1e23b6e18fd9d4353286dc9b890169700ce06e4
                   {console.log(row[column.key], "row[column.key]")}
                 </>
               ))}
               {actions && actions.length > 0 && (
+<<<<<<< HEAD
                 <TableCell align="left">
+=======
+                <TableCell align="left" sx={{
+                  ...bodyStyles,
+                  ...{ borderBottom: 0 },
+                  // ...(column?.icon_key && row?.[column?.icon_key]?.icon_name && {
+
+                  //   // justifyContent: 'start'
+                  // })
+                }}>
+>>>>>>> b1e23b6e18fd9d4353286dc9b890169700ce06e4
                   <Box display="flex" gap={1}>
                     {" "}
                     {/* You can adjust the gap value as needed */}
