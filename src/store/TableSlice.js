@@ -7,21 +7,15 @@ const initialState = {
       label: "Title",
       type: "text",
       subType: "",
-<<<<<<< HEAD
-=======
       icon_key: "item_type"
->>>>>>> b1e23b6e18fd9d4353286dc9b890169700ce06e4
     },
     {
       key: "inputFile",
       label: "Input File",
       type: "icon",
       subType: "voice_wave",
-<<<<<<< HEAD
-=======
       icon_key: "input_file",
       noText: true
->>>>>>> b1e23b6e18fd9d4353286dc9b890169700ce06e4
     },
     {
       key: "fileType",
@@ -63,8 +57,6 @@ const initialState = {
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
-<<<<<<< HEAD
-=======
       input_file: {
         icon_name: "bi:soundwave",
         input_file_url: '',
@@ -86,7 +78,6 @@ const initialState = {
           color: "#fff"
         }
       }
->>>>>>> b1e23b6e18fd9d4353286dc9b890169700ce06e4
     },
     {
       title: "Sample Audio",
@@ -96,12 +87,6 @@ const initialState = {
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
-<<<<<<< HEAD
-    },
-    {
-      title: "Another Sample",
-      inputFile: "",
-=======
       input_file: {
         icon_name: "bi:soundwave",
         input_file_url: '',
@@ -126,14 +111,11 @@ const initialState = {
     }, {
       title: "New Recording",
       inputFile: ".mp3",
->>>>>>> b1e23b6e18fd9d4353286dc9b890169700ce06e4
       fileType: ".mp4",
       outputFile: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
-<<<<<<< HEAD
-=======
       input_file: {
         icon_name: "bi:soundwave",
         input_file_url: '',
@@ -315,7 +297,6 @@ const initialState = {
           color: "#fff"
         }
       }
->>>>>>> b1e23b6e18fd9d4353286dc9b890169700ce06e4
     },
   ],
   actions: [

@@ -8,10 +8,6 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Icon } from "@iconify/react";
 import { Box, Tooltip } from "@mui/material";
-<<<<<<< HEAD
-=======
-
->>>>>>> b1e23b6e18fd9d4353286dc9b890169700ce06e4
 const BasicTable = ({ header, body, actions, metaData }) => {
   const headerStyles = {
     color: "#000000",
@@ -63,28 +59,16 @@ const BasicTable = ({ header, body, actions, metaData }) => {
               {metaData.requiredSerialNumber && (
                 <TableCell align="left" style={bodyStyles}>
                   {metaData?.paginatedSerialNumber &&
-<<<<<<< HEAD
-                  metaData?.paginationMetaData
-                    ? (metaData.paginationMetaData.page - 1) *
-                        metaData.paginationMetaData.count +
-                      (index + 1)
-=======
                     metaData?.paginationMetaData
                     ? (metaData.paginationMetaData.page - 1) *
                     metaData.paginationMetaData.count +
                     (index + 1)
->>>>>>> b1e23b6e18fd9d4353286dc9b890169700ce06e4
                     : index + 1}
                 </TableCell>
               )}{" "}
               {/* Use a unique identifier */}
               {header.map((column) => (
                 <>
-<<<<<<< HEAD
-                  <TableCell key={column.key} align="left" sx={bodyStyles}>
-                    {row[column.key] ? row[column.key] : "-"}
-                  </TableCell>
-=======
                   <TableCell
                     key={column.key}
                     align="left"
@@ -124,14 +108,10 @@ const BasicTable = ({ header, body, actions, metaData }) => {
 
                   </TableCell>
 
->>>>>>> b1e23b6e18fd9d4353286dc9b890169700ce06e4
                   {console.log(row[column.key], "row[column.key]")}
                 </>
               ))}
               {actions && actions.length > 0 && (
-<<<<<<< HEAD
-                <TableCell align="left">
-=======
                 <TableCell align="left" sx={{
                   ...bodyStyles,
                   ...{ borderBottom: 0 },
@@ -140,7 +120,6 @@ const BasicTable = ({ header, body, actions, metaData }) => {
                   //   // justifyContent: 'start'
                   // })
                 }}>
->>>>>>> b1e23b6e18fd9d4353286dc9b890169700ce06e4
                   <Box display="flex" gap={1}>
                     {" "}
                     {/* You can adjust the gap value as needed */}
