@@ -7,12 +7,15 @@ const initialState = {
       label: "Title",
       type: "text",
       subType: "",
+      icon_key: "item_type"
     },
     {
       key: "inputFile",
       label: "Input File",
       type: "icon",
       subType: "voice_wave",
+      icon_key: "input_file",
+      noText: true
     },
     {
       key: "fileType",
@@ -54,6 +57,27 @@ const initialState = {
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
+      input_file: {
+        icon_name: "bi:soundwave",
+        input_file_url: '',
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 30,
+          // padding: 3,
+          // borderRadius: 50,
+          color: "c3d9ff"
+        }
+
+      }, item_type: {
+        icon_name: "ri:mic-fill",
+        styles: {
+          backgroundColor: "#5A97FF",
+          fontSize: 10,
+          padding: 3,
+          borderRadius: 50,
+          color: "#fff"
+        }
+      }
     },
     {
       title: "Sample Audio",
@@ -63,15 +87,216 @@ const initialState = {
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
-    },
-    {
-      title: "Another Sample",
-      inputFile: "",
+      input_file: {
+        icon_name: "bi:soundwave",
+        input_file_url: '',
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 30,
+          // padding: 3,
+          // borderRadius: 50,
+          color: "c3d9ff"
+        }
+
+      }, item_type: {
+        icon_name: "ic:baseline-upload",
+        styles: {
+          backgroundColor: "#ff898b",
+          fontSize: 10,
+          padding: 3,
+          borderRadius: 50,
+          color: "#fff"
+        }
+      }
+    }, {
+      title: "New Recording",
+      inputFile: ".mp3",
       fileType: ".mp4",
       outputFile: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
+      input_file: {
+        icon_name: "bi:soundwave",
+        input_file_url: '',
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 30,
+          // padding: 3,
+          // borderRadius: 50,
+          color: "c3d9ff"
+        }
+
+      }, item_type: {
+        icon_name: "ri:mic-fill",
+        styles: {
+          backgroundColor: "#5A97FF",
+          fontSize: 10,
+          padding: 3,
+          borderRadius: 50,
+          color: "#fff"
+        }
+      },
+      input_file: {
+        icon_name: "bi:soundwave",
+        input_file_url: '',
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 30,
+          // padding: 3,
+          // borderRadius: 50,
+          color: "c3d9ff"
+        }
+
+      }
+    },
+    {
+      title: "Sample Audio",
+      inputFile: ".mp3",
+      fileType: "",
+      outputFile: "Hi! its a new audio recording...",
+      duration: "00:10",
+      "date&time": "23/09/2024  17:40",
+      play: "",
+      input_file: {
+        icon_name: "bi:soundwave",
+        input_file_url: '',
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 30,
+          // padding: 3,
+          // borderRadius: 50,
+          color: "c3d9ff"
+        }
+
+      }, item_type: {
+        icon_name: "ic:baseline-upload",
+        styles: {
+          backgroundColor: "#ff898b",
+          fontSize: 10,
+          padding: 3,
+          borderRadius: 50,
+          color: "#fff"
+        }
+      }
+    }, {
+      title: "New Recording",
+      inputFile: ".mp3",
+      fileType: ".mp4",
+      outputFile: "Hi! its a new audio recording...",
+      duration: "00:10",
+      "date&time": "23/09/2024  17:40",
+      play: "",
+      input_file: {
+        icon_name: "bi:soundwave",
+        input_file_url: '',
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 30,
+          // padding: 3,
+          // borderRadius: 50,
+          color: "c3d9ff"
+        }
+
+      }, item_type: {
+        icon_name: "ri:mic-fill",
+        styles: {
+          backgroundColor: "#5A97FF",
+          fontSize: 10,
+          padding: 3,
+          borderRadius: 50,
+          color: "#fff"
+        }
+      }
+    },
+    {
+      title: "Sample Audio",
+      inputFile: ".mp3",
+      fileType: "",
+      outputFile: "Hi! its a new audio recording...",
+      duration: "00:10",
+      "date&time": "23/09/2024  17:40",
+      play: "",
+      input_file: {
+        icon_name: "bi:soundwave",
+        input_file_url: '',
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 30,
+          // padding: 3,
+          // borderRadius: 50,
+          color: "c3d9ff"
+        }
+
+      }, item_type: {
+        icon_name: "ic:baseline-upload",
+        styles: {
+          backgroundColor: "#ff898b",
+          fontSize: 10,
+          padding: 3,
+          borderRadius: 50,
+          color: "#fff"
+        }
+      }
+    }, {
+      title: "New Recording",
+      inputFile: ".mp3",
+      fileType: ".mp4",
+      outputFile: "Hi! its a new audio recording...",
+      duration: "00:10",
+      "date&time": "23/09/2024  17:40",
+      play: "",
+      input_file: {
+        icon_name: "bi:soundwave",
+        input_file_url: '',
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 30,
+          // padding: 3,
+          // borderRadius: 50,
+          color: "c3d9ff"
+        }
+
+      }, item_type: {
+        icon_name: "ri:mic-fill",
+        styles: {
+          backgroundColor: "#5A97FF",
+          fontSize: 10,
+          padding: 3,
+          borderRadius: 50,
+          color: "#fff"
+        }
+      }
+    },
+    {
+      title: "Sample Audio",
+      inputFile: ".mp3",
+      fileType: "",
+      outputFile: "Hi! its a new audio recording...",
+      duration: "00:10",
+      "date&time": "23/09/2024  17:40",
+      play: "",
+      input_file: {
+        icon_name: "bi:soundwave",
+        input_file_url: '',
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 30,
+          // padding: 3,
+          // borderRadius: 50,
+          color: "c3d9ff"
+        }
+
+      }, item_type: {
+        icon_name: "ic:baseline-upload",
+        styles: {
+          backgroundColor: "#ff898b",
+          fontSize: 10,
+          padding: 3,
+          borderRadius: 50,
+          color: "#fff"
+        }
+      }
     },
   ],
   actions: [
