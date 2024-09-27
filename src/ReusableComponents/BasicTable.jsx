@@ -7,8 +7,8 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Icon } from "@iconify/react";
-import { Box } from "@mui/material";
-const BasicTable = ({ header, body, actions }) => {
+import { Box, Tooltip } from "@mui/material";
+const BasicTable = ({ header, body, actions, metaData }) => {
   const headerStyles = {
     color: "#000000",
     fontWeight: 600,
@@ -26,6 +26,11 @@ const BasicTable = ({ header, body, actions }) => {
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
+            {metaData.requiredSerialNumber && (
+              <TableCell align="left" style={headerStyles}>
+                S.No
+              </TableCell>
+            )}
             {header.map((column) => (
               <TableCell
                 key={column.key}
@@ -46,9 +51,18 @@ const BasicTable = ({ header, body, actions }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {body.map((row) => (
+          {body.map((row, index) => (
             <TableRow key={row[header[0].key]}>
-              {" "}
+              {metaData.requiredSerialNumber && (
+                <TableCell align="left" style={bodyStyles}>
+                  {metaData?.paginatedSerialNumber &&
+                  metaData?.paginationMetaData
+                    ? (metaData.paginationMetaData.page - 1) *
+                        metaData.paginationMetaData.count +
+                      (index + 1)
+                    : index + 1}
+                </TableCell>
+              )}{" "}
               {/* Use a unique identifier */}
               {header.map((column) => (
                 <>
@@ -64,13 +78,17 @@ const BasicTable = ({ header, body, actions }) => {
                     {" "}
                     {/* You can adjust the gap value as needed */}
                     {actions.map((action) => (
-                      <Icon
-                        key={action.key} // Ensure each icon has a unique key
-                        icon={action?.icon}
-                        width="24"
-                        height="24"
-                        color={action.color}
-                      />
+                      <Tooltip key={action.key} title={action.label} arrow>
+                        <span>
+                          <Icon
+                            icon={action?.icon}
+                            width="24"
+                            height="24"
+                            color={action.color}
+                            cursor="pointer"
+                          />
+                        </span>
+                      </Tooltip>
                     ))}
                   </Box>
                 </TableCell>
