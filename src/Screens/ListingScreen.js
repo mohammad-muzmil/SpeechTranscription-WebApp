@@ -6,9 +6,10 @@ import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
 import { Grid2, Typography } from "@mui/material";
 import ReactAudioPlayer from "react-audio-player";
+import AudioRecorder from "../ReusableComponents/AudioRecorder";
 function ListingScreen() {
   const [active, setActive] = useState("record");
-
+  const [isRecording, setIsRecording] = useState(false);
   const handleToggle = (option) => {
     setActive(option);
   };
@@ -128,7 +129,8 @@ function ListingScreen() {
 
   const { header, body, actions } = useSelector((state) => state.data);
   const dispatch = useDispatch();
-  const recorder = (e) => { };
+  const recorder = (e) => {};
+  console.log(isRecording, "isRecording");
   return (
     <div className="container">
       <div className="top-section">
@@ -156,7 +158,10 @@ function ListingScreen() {
                 <div className="options">
                   <div
                     className={`option ${active === "upload" ? "active" : ""}`}
-                    onClick={() => handleToggle("upload")}
+                    onClick={() => {
+                      handleToggle("upload");
+                      setIsRecording(false);
+                    }}
                   >
                     <div
                       style={{
@@ -177,7 +182,9 @@ function ListingScreen() {
                   </div>
                   <div
                     className={`option ${active === "record" ? "active" : ""}`}
-                    onClick={() => handleToggle("record")}
+                    onClick={() => {
+                      handleToggle("record");
+                    }}
                   >
                     <div
                       style={{
@@ -198,10 +205,10 @@ function ListingScreen() {
                 </div>
               </div>
             </div>
-            <div className="childSection uploadSection" >
+            <div className="childSection uploadSection">
               {active === "upload" ? (
                 // Your component or JSX for the "upload" condition
-                <span style={{ textAlign: 'center' }}>
+                <span style={{ textAlign: "center" }}>
                   <div className="uploadIconHolder">
                     <Icon
                       icon="solar:cloud-upload-outline"
@@ -220,23 +227,34 @@ function ListingScreen() {
                   </span>
                 </span>
               ) : (
+                <>
+                  {isRecording ? (
+                    <>
+                     
+                    <AudioRecorder />
+                    </>
+                  ) : (
+                    <span
+                      className="recordSectionContainer recordL1"
+                      onClick={() => setIsRecording(true)}
+                      style={{cursor:'pointer'}}
+                    >
+                      <div className="recordSectionL1IconHolder">
+                        <Icon
+                          icon="material-symbols:mic"
+                          style={{ fontSize: "50px", color: "white" }}
+                        ></Icon>
+                      </div>
+                      <div className="titleSection">
+                        <p className="titleContainer">Record Speech</p>
+                        <p className="mutedText">
+                          To record your Speech click on the blue button.
+                        </p>
+                      </div>
+                    </span>
+                  )}
+                </>
 
-                <span className="recordSectionContainer recordL1">
-
-                  <div className="recordSectionL1IconHolder">
-                    <Icon
-                      icon="material-symbols:mic"
-                      style={{ fontSize: "50px", color: "white" }}
-                    ></Icon>
-                  </div>
-                  <div className="titleSection">
-
-                    <p className="titleContainer">Record Speech</p>
-                    <p className="mutedText">To record your Speech
-                      click on the blue button.</p>
-                  </div>
-
-                </span>
                 // <Grid2
                 //   container
                 //   spacing={2}
@@ -276,13 +294,7 @@ function ListingScreen() {
                 //   </Grid2>
                 // </Grid2>
               )}
-
-
             </div>
-
-
-
-
           </div>
         </div>
 
@@ -299,7 +311,7 @@ function ListingScreen() {
           metaData={metaInformation}
         />
       </div>
-    </div >
+    </div>
   );
 }
 
