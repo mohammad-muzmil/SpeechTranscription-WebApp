@@ -8,7 +8,6 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Icon } from "@iconify/react";
 import { Box, Tooltip } from "@mui/material";
-import ReactAudioPlayer from "react-audio-player";
 
 const BasicTable = ({ header, body, actions, metaData }) => {
   const headerStyles = {
