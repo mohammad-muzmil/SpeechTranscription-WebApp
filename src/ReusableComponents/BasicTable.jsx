@@ -8,7 +8,6 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Icon } from "@iconify/react";
 import { Box, Tooltip } from "@mui/material";
-import ReactAudioPlayer from "react-audio-player";
 
 const BasicTable = ({ header, body, actions, metaData }) => {
   const headerStyles = {
@@ -124,6 +123,7 @@ const BasicTable = ({ header, body, actions, metaData }) => {
 
                       // <ReactAudioPlayer src="https://commondatastorage.googleapis.com/codeskulptor-assets/Collision8-Bit.ogg" autoPlay controls style={{ backgroundColor: 'transparent' }} // Remove background color
                       // />
+                      <>
                       <audio controls
                         style={{
                           backgroundColor: 'transparent', // Make the audio background transparent
@@ -131,9 +131,10 @@ const BasicTable = ({ header, body, actions, metaData }) => {
                           width: '300px', // Set width as needed
                           outline: 'none', // Remove outline
                         }}>
-                        <source src="https://commondatastorage.googleapis.com/codeskulptor-assets/Collision8-Bit.ogg" type="audio/mpeg" />
+                        <source src={row[column?.type]?.url} type="audio/mpeg" />
                         Your browser does not support the audio element.
                       </audio>
+                      </>
                     )}
 
 
@@ -167,7 +168,7 @@ const BasicTable = ({ header, body, actions, metaData }) => {
 
                   </TableCell>
 
-                  {console.log(row[column.key], "row[column.key]")}
+                  {/* {console.log(row[column.key], "row[column.key]")} */}
                 </>
               ))}
               {actions && actions.length > 0 && (

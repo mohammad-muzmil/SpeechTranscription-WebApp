@@ -5,6 +5,7 @@ import BasicTable from "../ReusableComponents/BasicTable";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
 import AudioRecorder from "../ReusableComponents/AudioRecorder";
+import { fetchBodyData } from "../store/TableSlice";
 function ListingScreen() {
   const [active, setActive] = useState("record");
   const [isRecording, setIsRecording] = useState(false);
@@ -59,6 +60,11 @@ function ListingScreen() {
   const dispatch = useDispatch();
   const recorder = (e) => {};
   console.log(file, "file");
+  // useEffect(() => {
+  //   // Fetch body data on component mount
+  //   dispatch(fetchBodyData('POST','/processaudio',));
+  // }, [dispatch]);
+
   return (
     <div className="container">
       <div className="top-section">

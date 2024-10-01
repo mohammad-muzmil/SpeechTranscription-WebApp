@@ -149,6 +149,7 @@ const AudioRecorder = () => {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              // justifyContent:"center"
             }}
           >
             <p
@@ -179,19 +180,23 @@ const AudioRecorder = () => {
                   }}
                 />
               ) : (
-                <Icon
-                  onClick={stopRecording}
-                  className="bg-gray-500 hover:bg-gray-600"
-                  icon="fluent:record-stop-28-regular"
-                  width="38"
-                  height="38"
-                  style={{
-                    color: "red",
-                    cursor: "pointer",
-                  }}
-                />
+                <>
+                  {isRecording && <div>{formatTime(recordingTime)}</div>}
+
+                  <Icon
+                    onClick={stopRecording}
+                    className="bg-gray-500 hover:bg-gray-600"
+                    icon="fluent:record-stop-28-regular"
+                    width="38"
+                    height="38"
+                    style={{
+                      color: "red",
+                      cursor: "pointer",
+                      marginLeft: "10px",
+                    }}
+                  />
+                </>
               )}
-              {isRecording && <div>{formatTime(recordingTime)}</div>}
             </div>
           </div>
         </>

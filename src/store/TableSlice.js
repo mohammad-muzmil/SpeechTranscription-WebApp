@@ -1,4 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice ,createAsyncThunk} from '@reduxjs/toolkit';
+import axios from 'axios';
 
 const initialState = {
   header: [
@@ -56,10 +57,10 @@ const initialState = {
       outputFile: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
-      // play: {
-      //   url:"https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
-      //   type:".mp3"
-      // },
+      audio: {
+        url:"https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
+        type:".mp3"
+      },
       input_file: {
         icon_name: "bi:soundwave",
         input_file_url: '',
@@ -317,7 +318,26 @@ const initialState = {
     },
   ],
 };
+const baseURL = 'your_api_endpoint_here/';
 
+export const fetchBodyData = createAsyncThunk(
+  'data/fetchBodyData',
+  async ({ method, endpoint ,payload }) => {
+    try {
+      const config = {
+        method: method, // HTTP method (GET, POST, etc.)
+        url: baseURL + endpoint,
+        ...(method === 'GET' ? { params: payload } : { data: payload }), // Use params for GET and data for others
+      };
+
+      const response = await axios(config);
+      return response.data; // Return the data
+    } catch (error) {
+      // Handle error gracefully
+      throw new Error(error.response ? error.response.data : error.message);
+    }
+  }
+);
 const TableSlice = createSlice({
   name: 'data',
   initialState,
@@ -329,6 +349,18 @@ const TableSlice = createSlice({
       state.body.push(action.payload);
     },
     // Add more reducers as needed
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchBodyData.pending, (state) => {
+        // Optionally handle loading state
+      })
+      .addCase(fetchBodyData.fulfilled, (state, action) => {
+        state.body = action.payload; // Update body with fetched data
+      })
+      .addCase(fetchBodyData.rejected, (state, action) => {
+        console.error('Failed to fetch body data: ', action.error.message);
+      });
   },
 });
 
