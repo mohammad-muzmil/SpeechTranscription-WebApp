@@ -5,116 +5,47 @@ import BasicTable from "../ReusableComponents/BasicTable";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
 import { Grid2, Typography } from "@mui/material";
+import AudioRecorder from "../ReusableComponents/AudioRecorder";
 function ListingScreen() {
   const [active, setActive] = useState("record");
+  const [isRecording, setIsRecording] = useState(false);
+  const [file, setFile] = useState(null);
 
   const handleToggle = (option) => {
     setActive(option);
   };
 
-  // const header = [
-  //   {
-  //     key: "title",
-  //     label: "Title",
-  //     type: "text",
-  //     subType: "",
-  //     // minWidth: 280
-  //   },
-  //   {
-  //     key: "inputFile",
-  //     label: "Input File",
-  //     type: "icon",
-  //     subType: "voice_wave",
-  //     // minWidth: 30
-  //   },
-  //   {
-  //     key: "fileType",
-  //     label: "File Type",
-  //     type: "text",
-  //     subType: "",
-  //     // minWidth: 30
-  //   },
-  //   {
-  //     key: "outputFile",
-  //     label: "Output File",
-  //     type: "text",
-  //     subType: "",
-  //     // minWidth: 30
-  //   },
-  //   {
-  //     key: "duration",
-  //     label: "Duration",
-  //     type: "text",
-  //     subType: "",
-  //     // minWidth: 30
-  //   },
-  //   {
-  //     key: "date&time",
-  //     label: "Date & Time",
-  //     type: "date&time",
-  //     subType: "",
-  //     // minWidth: 30
-  //   },
-  //   {
-  //     key: "play",
-  //     label: "Play",
-  //     type: "play",
-  //     subType: "",
-  //     // minWidth: 30
-  //   },
-  // ];
+  const handleFile = (file) => {
+    // Here you can add any validation or handling logic for the file
+    if (file.size <= 50 * 1024 * 1024) {
+      // Check for file size limit (200MB)
+      setFile(file);
+      console.log("File uploaded:", file.name);
+    } else {
+      alert("File size exceeds the limit of 50MB");
+    }
+  };
 
-  // const body = [
-  //   {
-  //     title: "New Recording",
-  //     inputFile: ".mp3",
-  //     fileType: ".mp4",
-  //     outputFile: "Hi! its a new audio recording...",
-  //     duration: "00:10",
-  //     "date&time": "23/09/2024  17:40",
-  //     play: "",
-  //   },
-  //   {
-  //     title: "Sample Audio", // Added title to maintain consistency
-  //     inputFile: ".mp3",
-  //     fileType: "", // Optional, can be left empty
-  //     outputFile: "Hi! its a new audio recording...",
-  //     duration: "00:10",
-  //     "date&time": "23/09/2024  17:40",
-  //     play: "",
-  //   },
-  //   {
-  //     title: "Another Sample", // Added title to maintain consistency
-  //     inputFile: "", // Optional, can be left empty
-  //     fileType: ".mp4",
-  //     outputFile: "Hi! its a new audio recording...",
-  //     duration: "00:10",
-  //     "date&time": "23/09/2024  17:40",
-  //     play: "",
-  //   },
-  // ];
+  const handleDrop = (event) => {
+    event.preventDefault();
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+      handleFile(files[0]);
+    }
+  };
 
-  // const actions = [
-  //   {
-  //     key: "download",
-  //     label: "Download",
-  //     icon: "ri:download-fill",
-  //     color: "#0560FD",
-  //   },
-  //   {
-  //     key: "delete",
-  //     label: "Delete",
-  //     icon: "fluent:delete-28-regular",
-  //     color: "red",
-  //   },
-  //   // {
-  //   //     key: "delete",
-  //   //     label: "Delete",
-  //   //     icon: "arcticons:music-party",
-  //   //     color: "red",
-  //   // },
-  //   {},
-  // ];
+  const handleFileInputChange = (event) => {
+    const files = event.target.files;
+    if (files.length > 0) {
+      handleFile(files[0]);
+    }
+  };
+
+  const preventDefaults = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
 
   const metaInformation = {
     requiredSerialNumber: true,
@@ -128,6 +59,7 @@ function ListingScreen() {
   const { header, body, actions } = useSelector((state) => state.data);
   const dispatch = useDispatch();
   const recorder = (e) => { };
+  console.log(file, "file");
   return (
     <div className="container">
       <div className="top-section">
@@ -155,7 +87,10 @@ function ListingScreen() {
                 <div className="options">
                   <div
                     className={`option ${active === "upload" ? "active" : ""}`}
-                    onClick={() => handleToggle("upload")}
+                    onClick={() => {
+                      handleToggle("upload");
+                      setIsRecording(false);
+                    }}
                   >
                     <div
                       style={{
@@ -176,7 +111,9 @@ function ListingScreen() {
                   </div>
                   <div
                     className={`option ${active === "record" ? "active" : ""}`}
-                    onClick={() => handleToggle("record")}
+                    onClick={() => {
+                      handleToggle("record");
+                    }}
                   >
                     <div
                       style={{
@@ -197,45 +134,72 @@ function ListingScreen() {
                 </div>
               </div>
             </div>
-            <div className="childSection uploadSection" >
+            <div className="childSection uploadSection">
               {active === "upload" ? (
                 // Your component or JSX for the "upload" condition
-                <span style={{ textAlign: 'center' }}>
-                  <div className="uploadIconHolder">
-                    <Icon
-                      icon="solar:cloud-upload-outline"
-                      style={{ fontSize: "65px", color: "#0560FD" }}
-                    ></Icon>
-                  </div>
+                <div
+                  onDragEnter={preventDefaults}
+                  onDragLeave={preventDefaults}
+                  onDragOver={preventDefaults}
+                  onDrop={handleDrop}
+                  className="dropzone"
+                >
+                  <span style={{ textAlign: "center" }}>
+                    <div className="uploadIconHolder">
+                      <Icon
+                        icon="solar:cloud-upload-outline"
+                        style={{ fontSize: "65px", color: "#0560FD" }}
+                      />
+                    </div>
 
-                  <div className="uploaderContentSection">
-                    Drag & drop files or{" "}
-                    <span className="browseButtonStyle">Browse</span>
-                  </div>
+                    <div className="uploaderContentSection">
+                      Drag & drop files or{" "}
+                      <label className="browseButtonStyle" htmlFor="fileInput">
+                        Browse
+                      </label>
+                      <input
+                        id="fileInput"
+                        type="file"
+                        onChange={handleFileInputChange}
+                        style={{ display: "none" }} // Hide the file input
+                        accept=".wav,.mp3,.m4a,.mp4"
+                      />
+                    </div>
 
-                  <span className="uploaderMutedText">
-                    Limit 200mb per file. Supported formats: .wav, .mp3, .m4a,
-                    .mp4{" "}
+                    <span className="uploaderMutedText">
+                      Limit 200mb per file. Supported formats: .wav, .mp3, .m4a,
+                      .mp4
+                    </span>
                   </span>
-                </span>
+                </div>
               ) : (
+                <>
+                  {isRecording ? (
+                    <>
+                      <AudioRecorder />
+                    </>
+                  ) : (
+                    <span
+                      className="recordSectionContainer recordL1"
+                      onClick={() => setIsRecording(true)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <div className="recordSectionL1IconHolder">
+                        <Icon
+                          icon="material-symbols:mic"
+                          style={{ fontSize: "50px", color: "white" }}
+                        ></Icon>
+                      </div>
+                      <div className="titleSection">
+                        <p className="titleContainer">Record Speech</p>
+                        <p className="mutedText">
+                          To record your Speech click on the blue button.
+                        </p>
+                      </div>
+                    </span>
+                  )}
+                </>
 
-                <span className="recordSectionContainer recordL1">
-
-                  <div className="recordSectionL1IconHolder">
-                    <Icon
-                      icon="material-symbols:mic"
-                      style={{ fontSize: "50px", color: "white" }}
-                    ></Icon>
-                  </div>
-                  <div className="titleSection">
-
-                    <p className="titleContainer">Record Speech</p>
-                    <p className="mutedText">To record your Speech
-                      click on the blue button.</p>
-                  </div>
-
-                </span>
                 // <Grid2
                 //   container
                 //   spacing={2}
@@ -275,13 +239,7 @@ function ListingScreen() {
                 //   </Grid2>
                 // </Grid2>
               )}
-
-
             </div>
-
-
-
-
           </div>
         </div>
 
@@ -298,7 +256,7 @@ function ListingScreen() {
           metaData={metaInformation}
         />
       </div>
-    </div >
+    </div>
   );
 }
 
