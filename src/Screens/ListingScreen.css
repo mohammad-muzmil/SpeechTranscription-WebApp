@@ -193,6 +193,11 @@
 }
 
 
+.dropzone {
+    position: relative;
+}
+
+
 .recordSectionContainer {
     display: flex;
     flex-direction: row;
@@ -223,4 +228,22 @@
     margin-bottom: 0;
     padding: 0 40px;
 
+}
+
+.flexProperties {
+    display: flex;
+    flex-direction: row;
+}
+
+.modal_text {
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 10px;
+    color: #646464;
+
+}
+
+.modal_text span {
+    margin-left: 10px;
+    margin-right: 10px;
 }
