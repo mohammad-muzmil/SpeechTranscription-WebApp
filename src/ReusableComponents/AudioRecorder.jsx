@@ -15,15 +15,15 @@ const AudioRecorder = () => {
   const [recordingTime, setRecordingTime] = useState(0);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
-  const [open,setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  const handleClose=()=>{
-    console.log("HANDEL")
+  const handleClose = () => {
+    console.log("HANDEL");
     setOpen(!open);
-  }
-  const handleOpen=()=>{
+  };
+  const handleOpen = () => {
     setOpen(true);
-  }
+  };
   useEffect(() => {
     let interval = null;
 
@@ -97,7 +97,16 @@ const AudioRecorder = () => {
     <>
       {audioBlob ? (
         <>
-          <audio src={URL.createObjectURL(audioBlob)} controls />
+          <audio
+            src={URL.createObjectURL(audioBlob)}
+            style={{
+              backgroundColor: "transparent", // Make the audio background transparent
+              height: "35px", // Adjust height to minimize space
+              width: "300px", // Set width as needed
+              outline: "none", // Remove outline
+            }}
+            controls
+          />
           <div
             style={{
               display: "flex",
@@ -125,7 +134,9 @@ const AudioRecorder = () => {
               marginTop: "6px",
             }}
             variant="contained"
-            onClick={() => {handleOpen()}}
+            onClick={() => {
+              handleOpen();
+            }}
           >
             Start Transcription
           </Button>
@@ -190,19 +201,19 @@ const AudioRecorder = () => {
         maxWidth={false}
         open={open}
         PaperProps={{
-          sx: { maxWidth: 720 ,borderRadius:'15px'},
+          sx: { maxWidth: 720, borderRadius: "15px" },
         }}
       >
-         <ModalHeader heading="Audio Transcription" handleClose={handleClose}/>
+        <ModalHeader heading="Audio Transcription" handleClose={handleClose} />
         <DialogContent>
-        {audioBlob && (
-        <><p>Input Aduio</p>
-          <audio src={URL.createObjectURL(audioBlob)} controls />
-          <p>Transcripted Data</p>
-          <p>Transcripted Audio</p>
-          </>
-          )
-        }
+          {audioBlob && (
+            <>
+              <p>Input Aduio</p>
+              <audio src={URL.createObjectURL(audioBlob)} controls />
+              <p>Transcripted Data</p>
+              <p>Transcripted Audio</p>
+            </>
+          )}
         </DialogContent>
         <DialogActions></DialogActions>
       </Dialog>
