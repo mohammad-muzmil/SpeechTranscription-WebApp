@@ -4,36 +4,42 @@ import logoPng from "./../assets/images/logo.png";
 import BasicTable from "../ReusableComponents/BasicTable";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, Dialog, DialogActions, DialogContent, Grid2, Typography } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  Grid2,
+  Typography,
+} from "@mui/material";
 import AudioRecorder from "../ReusableComponents/AudioRecorder";
-import { fetchBodyData } from "../store/TableSlice";
-import axios from 'axios';
+import { addBodyItem, fetchBodyData } from "../store/TableSlice";
+import axios from "axios";
 import AudioLoader from "../ReusableComponents/AudioLoaders/AudioLoader";
 import ModalHeader from "../ReusableComponents/ModelHeader";
 
-
 function ListingScreen() {
-
   const [active, setActive] = useState("upload");
   const [isRecording, setIsRecording] = useState(false);
   const [file, setFile] = useState(null);
   const [fileMetData, setFileMetaData] = useState({});
-  const [loader, setLoader] = useState(false)
+  const [loader, setLoader] = useState(false);
 
   const handleToggle = (option) => {
     setActive(option);
   };
 
-  const ResetDefault = ()=>{
+  const ResetDefault = () => {
     setIsRecording(false);
-  }
+  };
+  console.log(fileMetData,"fileMetData",file,"file")
   const handleFile = (file) => {
     // Here you can add any validation or handling logic for the file
     if (file.size <= 50 * 1024 * 1024) {
-      setLoader(true)
+      setLoader(true);
 
       // Check for file size limit (200MB)
-      handleSubmit(file)
+      handleSubmit(file);
       setFile(file);
       console.log("File uploaded:", file.name);
     } else {
@@ -61,7 +67,6 @@ function ListingScreen() {
     event.stopPropagation();
   };
 
-
   const metaInformation = {
     requiredSerialNumber: true,
     paginatedSerialNumber: false,
@@ -71,7 +76,7 @@ function ListingScreen() {
     },
   };
 
-  const [transcriptionProcessData, setTranscriptionProcessData] = useState()
+  const [transcriptionProcessData, setTranscriptionProcessData] = useState();
 
   // {
   //   "generated_speech_url": "https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3",
@@ -80,39 +85,87 @@ function ListingScreen() {
   //   "transcription_time": "6.19 seconds",
   //   "tts_generation_time": "11.68 seconds"
   // }
-
+const  [newBodyItem,setNewBodyItem]=useState({});
+const StoreData = ()=>{
+  dispatch(addBodyItem(newBodyItem));
+  setOpen(false)
+}
   const handleSubmit = async (audioFile) => {
     // event.preventDefault();
     if (audioFile) {
       const formData = new FormData();
-      formData.append('audio', audioFile); // 'audio' is the key for the file
+      formData.append("audio", audioFile); // 'audio' is the key for the file
 
       try {
-        const response = await axios.post('http://192.168.0.182:5050/process_audio', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        setLoader(false)
+        const response = await axios.post(
+          "http://192.168.0.182:5050/process_audio",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        setLoader(false);
 
-        console.log('File uploaded successfully:', response.data);
+        console.log("File uploaded successfully:", response.data);
 
         if (response?.data?.generated_speech_url) {
           setTranscriptionProcessData(response?.data);
 
-          let audio = new Audio(URL.createObjectURL(audioFile))
-          setFileMetaData({ fileName: 'NewFile_' + new Date().getTime(), duration: audio.duration || '-' })
+          let audio = new Audio(URL.createObjectURL(audioFile));
+          setFileMetaData({
+            fileName: "NewFile_" + new Date().getTime(),
+            duration: audio.duration || "-",
+          });
+          audio.onloadedmetadata = () => {
+            setFileMetaData({
+              fileName: "NewFile_" + new Date().getTime(),
+              duration: audio.duration || "-",
+            });
+            setNewBodyItem({
+            title: "New Recording",
+            inputFile: audioFile.type,
+            fileType: audioFile.type, // Assuming fileType is the same as inputFile
+            Transcription: response.data.transcription || "Transcription not available", // Replace with actual transcription
+            duration: audio.duration || "-",
+            dateAndtime: new Date().toLocaleString(), // Get current date and time
+            audio: {
+              url: response.data.generated_speech_url,
+              type: audioFile.type
+            },
+            input_file: {
+              icon_name: "bi:soundwave",
+              input_file_url: '',
+              styles: {
+                color: "c3d9ff"
+              }
+            },
+            item_type: {
+              icon_name: "ri:mic-fill",
+              styles: {
+                backgroundColor: "#5A97FF",
+                fontSize: 10,
+                padding: 3,
+                borderRadius: 50,
+                color: "#fff"
+              }
+            }
+          });
+
+          // Dispatch the action to add the new body item
+         
           handleOpen();
         }
+      }
       } catch (error) {
-        setLoader(false)
+        setLoader(false);
 
-        console.error('Error uploading file:', error);
+        console.error("Error uploading file:", error);
       }
     } else {
-      alert('Please select an audio file first');
-      setLoader(false)
-
+      alert("Please select an audio file first");
+      setLoader(false);
     }
   };
 
@@ -127,7 +180,7 @@ function ListingScreen() {
   };
   const { header, body, actions } = useSelector((state) => state.data);
   const dispatch = useDispatch();
-  const recorder = (e) => { };
+  const recorder = (e) => {};
   console.log(file, "file");
   // useEffect(() => {
   //   // Fetch body data on component mount
@@ -147,10 +200,9 @@ function ListingScreen() {
   };
 
   const handleChange = (e) => {
-
     setFileMetaData((prev) => {
-      return { ...prev, ...{ fileName: e.target.value } }
-    })
+      return { ...prev, ...{ fileName: e.target.value } };
+    });
     // setFileName(e.target.value);
   };
   return (
@@ -224,12 +276,10 @@ function ListingScreen() {
                       <span style={{ fontSize: "16px" }}>Record</span>
                     </div>
                   </div>
-
                 </div>
               </div>
             </div>
             <div className="childSection uploadSection">
-
               {active === "upload" ? (
                 // Your component or JSX for the "upload" condition
                 <div
@@ -240,7 +290,6 @@ function ListingScreen() {
                   className="dropzone"
                 >
                   <span style={{ textAlign: "center" }}>
-
                     <div className="uploadIconHolder">
                       <Icon
                         icon="solar:cloud-upload-outline"
@@ -272,7 +321,10 @@ function ListingScreen() {
                 <>
                   {isRecording ? (
                     <>
-                      <AudioRecorder handleSubmit={handleSubmit}  ResetDefault={ResetDefault}/>
+                      <AudioRecorder
+                        handleSubmit={handleSubmit}
+                        ResetDefault={ResetDefault}
+                      />
                     </>
                   ) : (
                     <span
@@ -352,10 +404,7 @@ function ListingScreen() {
           metaData={metaInformation}
         />
       </div>
-      {
-        loader && <AudioLoader />
-
-      }
+      {loader && <AudioLoader />}
 
       <Dialog
         fullWidth
@@ -369,18 +418,22 @@ function ListingScreen() {
         <DialogContent>
           {transcriptionProcessData && (
             <>
-              <p style={{ fontSize: '16px', fontWeight: 500, color: "#646464" }}>Input Audio</p>
+              <p
+                style={{ fontSize: "16px", fontWeight: 500, color: "#646464" }}
+              >
+                Input Audio
+              </p>
               <audio
-                src={file ? URL.createObjectURL(file) : ''}
+                src={file ? URL.createObjectURL(file) : ""}
                 controls
                 style={{
-                  backgroundColor: 'transparent',
-                  height: '30px',
-                  width: '100%',
-                  outline: 'none',
+                  backgroundColor: "transparent",
+                  height: "30px",
+                  width: "100%",
+                  outline: "none",
                 }}
               />
-              <div className="flexProperties" style={{ justifyContent: 'end' }}>
+              <div className="flexProperties" style={{ justifyContent: "end" }}>
                 <div className="flexProperties modal_text">
                   {isEditing ? (
                     <input
@@ -389,43 +442,84 @@ function ListingScreen() {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       autoFocus
-                      style={{ border: 'none', outline: 'none', backgroundColor: 'transparent', color: '#000' }}
+                      style={{
+                        border: "none",
+                        outline: "none",
+                        backgroundColor: "transparent",
+                        color: "#000",
+                      }}
                     />
                   ) : (
-                    <span onDoubleClick={handleFileNameClick} style={{ cursor: 'pointer' }}>
+                    <span
+                      onDoubleClick={handleFileNameClick}
+                      style={{ cursor: "pointer" }}
+                    >
                       {fileMetData?.fileName}
                     </span>
                   )}
-                  <span>
-                    Duration: {fileMetData?.duration}
-                  </span>
+                  <span>Duration: {fileMetData?.duration}</span>
                 </div>
               </div>
-              <div className="flexProperties" style={{ justifyContent: 'space-between', marginTop: '25px' }}>
-                <span style={{ fontSize: '16px', fontWeight: 500, color: "#646464" }}>Transcription</span>
+              <div
+                className="flexProperties"
+                style={{ justifyContent: "space-between", marginTop: "25px" }}
+              >
+                <span
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 500,
+                    color: "#646464",
+                  }}
+                >
+                  Transcription
+                </span>
                 <span>
-
-                  <Icon icon="solar:chat-dots-linear" style={{ color: '#A7C7FF', fontSize: "20px" }}></Icon>
+                  <Icon
+                    icon="solar:chat-dots-linear"
+                    style={{ color: "#A7C7FF", fontSize: "20px" }}
+                  ></Icon>
                 </span>
               </div>
-              <p style={{ fontSize: "20px", fontWeight: 600, margin: 0 }}>{transcriptionProcessData.transcription}</p>
-              <p style={{ fontSize: '16px', fontWeight: 500, color: "#646464", marginTop: "25px" }}> Transcribed Audio</p>
-              <audio src={transcriptionProcessData.generated_speech_url} controls style={{
-                backgroundColor: 'transparent',
-                height: '30px',
-                width: '100%',
-                outline: 'none',
-              }} />
+              <p style={{ fontSize: "20px", fontWeight: 600, margin: 0 }}>
+                {transcriptionProcessData.transcription}
+              </p>
+              <p
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  color: "#646464",
+                  marginTop: "25px",
+                }}
+              >
+                {" "}
+                Transcribed Audio
+              </p>
+              <audio
+                src={transcriptionProcessData.generated_speech_url}
+                controls
+                style={{
+                  backgroundColor: "transparent",
+                  height: "30px",
+                  width: "100%",
+                  outline: "none",
+                }}
+              />
             </>
           )}
         </DialogContent>
         <DialogActions>
-
-          <Button variant="contained" sx={{ backgroundColor: "#303030" }} onClick={() => { handleClose() }}>Discard</Button>
-          <Button variant="contained">Save</Button>
+          <Button
+            variant="contained"
+            sx={{ backgroundColor: "#303030" }}
+            onClick={() => {
+              handleClose();
+            }}
+          >
+            Discard
+          </Button>
+          <Button variant="contained" onClick={()=>StoreData()}>Save</Button>
         </DialogActions>
       </Dialog>
-
     </div>
   );
 }

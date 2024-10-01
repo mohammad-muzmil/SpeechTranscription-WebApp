@@ -25,8 +25,8 @@ const initialState = {
       subType: "",
     },
     {
-      key: "outputFile",
-      label: "Output File",
+      key: "Transcription",
+      label: "Transcription",
       type: "text",
       subType: "",
     },
@@ -49,12 +49,13 @@ const initialState = {
       subType: "",
     },
   ],
-  body: [
+  body:[],
+  bodyTest: [
     {
       title: "New Recording",
       inputFile: ".mp3",
       fileType: ".mp4",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       audio: {
@@ -87,7 +88,7 @@ const initialState = {
       title: "Sample Audio",
       inputFile: ".mp3",
       fileType: "",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
@@ -116,7 +117,7 @@ const initialState = {
       title: "New Recording",
       inputFile: ".mp3",
       fileType: ".mp4",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
@@ -158,7 +159,7 @@ const initialState = {
       title: "Sample Audio",
       inputFile: ".mp3",
       fileType: "",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
@@ -187,7 +188,7 @@ const initialState = {
       title: "New Recording",
       inputFile: ".mp3",
       fileType: ".mp4",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
@@ -217,7 +218,7 @@ const initialState = {
       title: "Sample Audio",
       inputFile: ".mp3",
       fileType: "",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
@@ -246,7 +247,7 @@ const initialState = {
       title: "New Recording",
       inputFile: ".mp3",
       fileType: ".mp4",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
@@ -276,7 +277,7 @@ const initialState = {
       title: "Sample Audio",
       inputFile: ".mp3",
       fileType: "",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
@@ -318,26 +319,7 @@ const initialState = {
     },
   ],
 };
-const baseURL = 'your_api_endpoint_here/';
 
-export const fetchBodyData = createAsyncThunk(
-  'data/fetchBodyData',
-  async ({ method, endpoint ,payload }) => {
-    try {
-      const config = {
-        method: method, // HTTP method (GET, POST, etc.)
-        url: baseURL + endpoint,
-        ...(method === 'GET' ? { params: payload } : { data: payload }), // Use params for GET and data for others
-      };
-
-      const response = await axios(config);
-      return response.data; // Return the data
-    } catch (error) {
-      // Handle error gracefully
-      throw new Error(error.response ? error.response.data : error.message);
-    }
-  }
-);
 const TableSlice = createSlice({
   name: 'data',
   initialState,
@@ -350,19 +332,21 @@ const TableSlice = createSlice({
     },
     // Add more reducers as needed
   },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchBodyData.pending, (state) => {
-        // Optionally handle loading state
-      })
-      .addCase(fetchBodyData.fulfilled, (state, action) => {
-        state.body = action.payload; // Update body with fetched data
-      })
-      .addCase(fetchBodyData.rejected, (state, action) => {
-        console.error('Failed to fetch body data: ', action.error.message);
-      });
-  },
+ 
 });
 
 export const { updateBody, addBodyItem } = TableSlice.actions;
 export default TableSlice.reducer;
+
+// extraReducers: (builder) => {
+//   builder
+//     .addCase(fetchBodyData.pending, (state) => {
+//       // Optionally handle loading state
+//     })
+//     .addCase(fetchBodyData.fulfilled, (state, action) => {
+//       state.body = action.payload; // Update body with fetched data
+//     })
+//     .addCase(fetchBodyData.rejected, (state, action) => {
+//       console.error('Failed to fetch body data: ', action.error.message);
+//     });
+// },
