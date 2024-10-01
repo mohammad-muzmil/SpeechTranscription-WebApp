@@ -1,4 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice ,createAsyncThunk} from '@reduxjs/toolkit';
+import axios from 'axios';
 
 const initialState = {
   header: [
@@ -24,8 +25,8 @@ const initialState = {
       subType: "",
     },
     {
-      key: "outputFile",
-      label: "Output File",
+      key: "Transcription",
+      label: "Transcription",
       type: "text",
       subType: "",
     },
@@ -48,18 +49,19 @@ const initialState = {
       subType: "",
     },
   ],
-  body: [
+  body:[],
+  bodyTest: [
     {
       title: "New Recording",
       inputFile: ".mp3",
       fileType: ".mp4",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
-      // play: {
-      //   url:"https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
-      //   type:".mp3"
-      // },
+      audio: {
+        url:"https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
+        type:".mp3"
+      },
       input_file: {
         icon_name: "bi:soundwave",
         input_file_url: '',
@@ -86,7 +88,7 @@ const initialState = {
       title: "Sample Audio",
       inputFile: ".mp3",
       fileType: "",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
@@ -115,7 +117,7 @@ const initialState = {
       title: "New Recording",
       inputFile: ".mp3",
       fileType: ".mp4",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
@@ -157,7 +159,7 @@ const initialState = {
       title: "Sample Audio",
       inputFile: ".mp3",
       fileType: "",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
@@ -186,7 +188,7 @@ const initialState = {
       title: "New Recording",
       inputFile: ".mp3",
       fileType: ".mp4",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
@@ -216,7 +218,7 @@ const initialState = {
       title: "Sample Audio",
       inputFile: ".mp3",
       fileType: "",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
@@ -245,7 +247,7 @@ const initialState = {
       title: "New Recording",
       inputFile: ".mp3",
       fileType: ".mp4",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
@@ -275,7 +277,7 @@ const initialState = {
       title: "Sample Audio",
       inputFile: ".mp3",
       fileType: "",
-      outputFile: "Hi! its a new audio recording...",
+      Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       play: "",
@@ -330,7 +332,21 @@ const TableSlice = createSlice({
     },
     // Add more reducers as needed
   },
+ 
 });
 
 export const { updateBody, addBodyItem } = TableSlice.actions;
 export default TableSlice.reducer;
+
+// extraReducers: (builder) => {
+//   builder
+//     .addCase(fetchBodyData.pending, (state) => {
+//       // Optionally handle loading state
+//     })
+//     .addCase(fetchBodyData.fulfilled, (state, action) => {
+//       state.body = action.payload; // Update body with fetched data
+//     })
+//     .addCase(fetchBodyData.rejected, (state, action) => {
+//       console.error('Failed to fetch body data: ', action.error.message);
+//     });
+// },
