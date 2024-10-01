@@ -154,6 +154,7 @@
     border: 2px dashed #ccc;
     border-radius: 30px;
     padding: 10px;
+    height: 10rem;
 }
 
 .recordSection {
@@ -161,6 +162,8 @@
     border: 2px dashed #ccc;
     border-radius: 30px;
     padding: 10px;
+    height: 10rem;
+
 }
 
 .uploaderContentSection {
