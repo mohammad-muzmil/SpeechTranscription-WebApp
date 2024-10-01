@@ -4,7 +4,7 @@ import logoPng from "./../assets/images/logo.png";
 import BasicTable from "../ReusableComponents/BasicTable";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
-import { Dialog, DialogActions, DialogContent, Grid2, Typography } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, Grid2, Typography } from "@mui/material";
 import AudioRecorder from "../ReusableComponents/AudioRecorder";
 import axios from 'axios';
 import AudioLoader from "../ReusableComponents/AudioLoaders/AudioLoader";
@@ -16,7 +16,7 @@ function ListingScreen() {
   const [active, setActive] = useState("upload");
   const [isRecording, setIsRecording] = useState(false);
   const [file, setFile] = useState(null);
-  const [fileMetData, setFileMetaData] = useState({ fileName: 'NewFile_' + new Date().getTime(), duration: '00:00:10' });
+  const [fileMetData, setFileMetaData] = useState({});
   const [loader, setLoader] = useState(false)
 
   const handleToggle = (option) => {
@@ -67,13 +67,15 @@ function ListingScreen() {
     },
   };
 
-  const [transcriptionProcessData, setTranscriptionProcessData] = useState({
-    "generated_speech_url": "https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3",
-    "total_response_time": "17.87 seconds",
-    "transcription": "Manai, known as the Lazy Bug, seemed indifferent at work, arriving late, sipping coffee, and moving slowly. His colleagues believed he wasn't pulling his weight, always underestimating him. However, when the company faced a massive, buggy project with a tight deadline, panic struck the team, except Manai. Calmly observing, he surprised everyone by solving the complex issues effortlessly at the last minute, saving the project. What appeared to be laziness was, in fact, quiet genius. Manai was no longer seen as lazy, but as a brilliant problem solver, who worked on his own terms.",
-    "transcription_time": "6.19 seconds",
-    "tts_generation_time": "11.68 seconds"
-  })
+  const [transcriptionProcessData, setTranscriptionProcessData] = useState()
+
+  // {
+  //   "generated_speech_url": "https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3",
+  //   "total_response_time": "17.87 seconds",
+  //   "transcription": "Manai, known as the Lazy Bug, seemed indifferent at work, arriving late, sipping coffee, and moving slowly. His colleagues believed he wasn't pulling his weight, always underestimating him. However, when the company faced a massive, buggy project with a tight deadline, panic struck the team, except Manai. Calmly observing, he surprised everyone by solving the complex issues effortlessly at the last minute, saving the project. What appeared to be laziness was, in fact, quiet genius. Manai was no longer seen as lazy, but as a brilliant problem solver, who worked on his own terms.",
+  //   "transcription_time": "6.19 seconds",
+  //   "tts_generation_time": "11.68 seconds"
+  // }
 
   const handleSubmit = async (audioFile) => {
     // event.preventDefault();
@@ -113,6 +115,8 @@ function ListingScreen() {
   const handleClose = () => {
     console.log("HANDEL");
     setOpen(!open);
+    setFileMetaData();
+    setTranscriptionProcessData();
   };
   const handleOpen = () => {
     setOpen(true);
@@ -352,11 +356,11 @@ function ListingScreen() {
           sx: { maxWidth: 720, borderRadius: "15px" },
         }}
       >
-        <ModalHeader heading="Audio Transcription" handleClose={handleClose} />
+        <ModalHeader heading="Audio Transcription" />
         <DialogContent>
           {transcriptionProcessData && (
             <>
-              <p>Input Audio</p>
+              <p style={{ fontSize: '16px', fontWeight: 500, color: "#646464" }}>Input Audio</p>
               <audio
                 src={file ? URL.createObjectURL(file) : ''}
                 controls
@@ -388,13 +392,29 @@ function ListingScreen() {
                   </span>
                 </div>
               </div>
-              <p>{transcriptionProcessData.transcription}</p>
-              <p>Transcribed Audio</p>
-              <audio src={transcriptionProcessData.generated_speech_url} controls />
+              <div className="flexProperties" style={{ justifyContent: 'space-between', marginTop: '25px' }}>
+                <span style={{ fontSize: '16px', fontWeight: 500, color: "#646464" }}>Transcription</span>
+                <span>
+
+                  <Icon icon="solar:chat-dots-linear" style={{ color: '#A7C7FF', fontSize: "20px" }}></Icon>
+                </span>
+              </div>
+              <p style={{ fontSize: "20px", fontWeight: 600, margin: 0 }}>{transcriptionProcessData.transcription}</p>
+              <p style={{ fontSize: '16px', fontWeight: 500, color: "#646464", marginTop: "25px" }}> Transcribed Audio</p>
+              <audio src={transcriptionProcessData.generated_speech_url} controls style={{
+                backgroundColor: 'transparent',
+                height: '30px',
+                width: '100%',
+                outline: 'none',
+              }} />
             </>
           )}
         </DialogContent>
-        <DialogActions></DialogActions>
+        <DialogActions>
+
+          <Button variant="contained" sx={{ backgroundColor: "#303030" }} onClick={() => { handleClose() }}>Discard</Button>
+          <Button variant="contained">Save</Button>
+        </DialogActions>
       </Dialog>
 
     </div>
