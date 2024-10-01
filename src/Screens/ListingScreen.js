@@ -24,6 +24,9 @@ function ListingScreen() {
     setActive(option);
   };
 
+  const ResetDefault = ()=>{
+    setIsRecording(false);
+  }
   const handleFile = (file) => {
     // Here you can add any validation or handling logic for the file
     if (file.size <= 50 * 1024 * 1024) {
@@ -265,7 +268,7 @@ function ListingScreen() {
                 <>
                   {isRecording ? (
                     <>
-                      <AudioRecorder />
+                      <AudioRecorder handleSubmit={handleSubmit}  ResetDefault={ResetDefault}/>
                     </>
                   ) : (
                     <span
