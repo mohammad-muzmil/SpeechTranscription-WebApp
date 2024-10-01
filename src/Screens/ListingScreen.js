@@ -4,12 +4,20 @@ import logoPng from "./../assets/images/logo.png";
 import BasicTable from "../ReusableComponents/BasicTable";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
-import { Grid2, Typography } from "@mui/material";
+import { Dialog, DialogActions, DialogContent, Grid2, Typography } from "@mui/material";
 import AudioRecorder from "../ReusableComponents/AudioRecorder";
+import axios from 'axios';
+import AudioLoader from "../ReusableComponents/AudioLoaders/AudioLoader";
+import ModalHeader from "../ReusableComponents/ModelHeader";
+
+
 function ListingScreen() {
-  const [active, setActive] = useState("record");
+
+  const [active, setActive] = useState("upload");
   const [isRecording, setIsRecording] = useState(false);
   const [file, setFile] = useState(null);
+  const [fileMetData, setFileMetaData] = useState({ fileName: 'NewFile_' + new Date().getTime(), duration: '00:00:10' });
+  const [loader, setLoader] = useState(false)
 
   const handleToggle = (option) => {
     setActive(option);
@@ -18,7 +26,10 @@ function ListingScreen() {
   const handleFile = (file) => {
     // Here you can add any validation or handling logic for the file
     if (file.size <= 50 * 1024 * 1024) {
+      setLoader(true)
+
       // Check for file size limit (200MB)
+      handleSubmit(file)
       setFile(file);
       console.log("File uploaded:", file.name);
     } else {
@@ -56,10 +67,79 @@ function ListingScreen() {
     },
   };
 
+  const [transcriptionProcessData, setTranscriptionProcessData] = useState({
+    "generated_speech_url": "https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3",
+    "total_response_time": "17.87 seconds",
+    "transcription": "Manai, known as the Lazy Bug, seemed indifferent at work, arriving late, sipping coffee, and moving slowly. His colleagues believed he wasn't pulling his weight, always underestimating him. However, when the company faced a massive, buggy project with a tight deadline, panic struck the team, except Manai. Calmly observing, he surprised everyone by solving the complex issues effortlessly at the last minute, saving the project. What appeared to be laziness was, in fact, quiet genius. Manai was no longer seen as lazy, but as a brilliant problem solver, who worked on his own terms.",
+    "transcription_time": "6.19 seconds",
+    "tts_generation_time": "11.68 seconds"
+  })
+
+  const handleSubmit = async (audioFile) => {
+    // event.preventDefault();
+    if (audioFile) {
+      const formData = new FormData();
+      formData.append('audio', audioFile); // 'audio' is the key for the file
+
+      try {
+        const response = await axios.post('http://192.168.0.182:5050/process_audio', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        setLoader(false)
+
+        console.log('File uploaded successfully:', response.data);
+
+        if (response?.data?.generated_speech_url) {
+          setTranscriptionProcessData(response?.data);
+
+          let audio = new Audio(URL.createObjectURL(audioFile))
+          setFileMetaData({ fileName: 'NewFile_' + new Date().getTime(), duration: audio.duration || '-' })
+          handleOpen();
+        }
+      } catch (error) {
+        setLoader(false)
+
+        console.error('Error uploading file:', error);
+      }
+    } else {
+      alert('Please select an audio file first');
+      setLoader(false)
+
+    }
+  };
+
+  const handleClose = () => {
+    console.log("HANDEL");
+    setOpen(!open);
+  };
+  const handleOpen = () => {
+    setOpen(true);
+  };
   const { header, body, actions } = useSelector((state) => state.data);
   const dispatch = useDispatch();
   const recorder = (e) => { };
   console.log(file, "file");
+  const [open, setOpen] = useState(false);
+
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleFileNameClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleBlur = () => {
+    setIsEditing(false);
+  };
+
+  const handleChange = (e) => {
+
+    setFileMetaData((prev) => {
+      return { ...prev, ...{ fileName: e.target.value } }
+    })
+    // setFileName(e.target.value);
+  };
   return (
     <div className="container">
       <div className="top-section">
@@ -131,10 +211,12 @@ function ListingScreen() {
                       <span style={{ fontSize: "16px" }}>Record</span>
                     </div>
                   </div>
+
                 </div>
               </div>
             </div>
             <div className="childSection uploadSection">
+
               {active === "upload" ? (
                 // Your component or JSX for the "upload" condition
                 <div
@@ -145,6 +227,7 @@ function ListingScreen() {
                   className="dropzone"
                 >
                   <span style={{ textAlign: "center" }}>
+
                     <div className="uploadIconHolder">
                       <Icon
                         icon="solar:cloud-upload-outline"
@@ -256,6 +339,64 @@ function ListingScreen() {
           metaData={metaInformation}
         />
       </div>
+      {
+        loader && <AudioLoader />
+
+      }
+
+      <Dialog
+        fullWidth
+        maxWidth={false}
+        open={open}
+        PaperProps={{
+          sx: { maxWidth: 720, borderRadius: "15px" },
+        }}
+      >
+        <ModalHeader heading="Audio Transcription" handleClose={handleClose} />
+        <DialogContent>
+          {transcriptionProcessData && (
+            <>
+              <p>Input Audio</p>
+              <audio
+                src={file ? URL.createObjectURL(file) : ''}
+                controls
+                style={{
+                  backgroundColor: 'transparent',
+                  height: '30px',
+                  width: '100%',
+                  outline: 'none',
+                }}
+              />
+              <div className="flexProperties" style={{ justifyContent: 'end' }}>
+                <div className="flexProperties modal_text">
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={fileMetData?.fileName}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      autoFocus
+                      style={{ border: 'none', outline: 'none', backgroundColor: 'transparent', color: '#000' }}
+                    />
+                  ) : (
+                    <span onDoubleClick={handleFileNameClick} style={{ cursor: 'pointer' }}>
+                      {fileMetData?.fileName}
+                    </span>
+                  )}
+                  <span>
+                    Duration: {fileMetData?.duration}
+                  </span>
+                </div>
+              </div>
+              <p>{transcriptionProcessData.transcription}</p>
+              <p>Transcribed Audio</p>
+              <audio src={transcriptionProcessData.generated_speech_url} controls />
+            </>
+          )}
+        </DialogContent>
+        <DialogActions></DialogActions>
+      </Dialog>
+
     </div>
   );
 }
