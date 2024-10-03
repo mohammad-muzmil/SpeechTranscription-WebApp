@@ -1,0 +1,7 @@
+.onHoverButton {
+    cursor: pointer;
+}
+
+.onHoverButton:hover {
+    text-decoration: underline;
+}

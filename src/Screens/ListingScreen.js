@@ -32,9 +32,12 @@ function ListingScreen() {
   const ResetDefault = () => {
     setIsRecording(false);
   };
-  console.log(fileMetData,"fileMetData",file,"file")
+  console.log(fileMetData, "fileMetData", file, "file")
   const handleFile = (file) => {
     // Here you can add any validation or handling logic for the file
+
+    document.getElementById('fileInput').value = '';
+
     if (file.size <= 50 * 1024 * 1024) {
       setLoader(true);
 
@@ -85,16 +88,22 @@ function ListingScreen() {
   //   "transcription_time": "6.19 seconds",
   //   "tts_generation_time": "11.68 seconds"
   // }
-const  [newBodyItem,setNewBodyItem]=useState({});
-const StoreData = ()=>{
-  dispatch(addBodyItem(newBodyItem));
-  setOpen(false)
-}
+  const [newBodyItem, setNewBodyItem] = useState({});
+  const StoreData = () => {
+
+    let data = newBodyItem;
+    data['title'] = fileMetData?.fileName;
+    dispatch(addBodyItem(data));
+    setOpen(false)
+  }
   const handleSubmit = async (audioFile) => {
     // event.preventDefault();
-    if (audioFile) {
+
+    let newAudioFile = audioFile?.fileName ? audioFile.audio : audioFile;
+    let fileName = audioFile?.fileName ? audioFile.fileName : 'NewFile_' + new Date().getTime();
+    if (newAudioFile) {
       const formData = new FormData();
-      formData.append("audio", audioFile); // 'audio' is the key for the file
+      formData.append("audio", newAudioFile); // 'audio' is the key for the file
 
       try {
         const response = await axios.post(
@@ -113,51 +122,51 @@ const StoreData = ()=>{
         if (response?.data?.generated_speech_url) {
           setTranscriptionProcessData(response?.data);
 
-          let audio = new Audio(URL.createObjectURL(audioFile));
+          let audio = new Audio(URL.createObjectURL(newAudioFile));
           setFileMetaData({
-            fileName: "NewFile_" + new Date().getTime(),
+            fileName: fileName,
             duration: audio.duration || "-",
           });
           audio.onloadedmetadata = () => {
             setFileMetaData({
-              fileName: "NewFile_" + new Date().getTime(),
+              fileName: fileName,
               duration: audio.duration || "-",
             });
             setNewBodyItem({
-            title: "New Recording",
-            inputFile: audioFile.type,
-            fileType: audioFile.type, // Assuming fileType is the same as inputFile
-            Transcription: response.data.transcription || "Transcription not available", // Replace with actual transcription
-            duration: audio.duration || "-",
-            dateAndtime: new Date().toLocaleString(), // Get current date and time
-            audio: {
-              url: response.data.generated_speech_url,
-              type: audioFile.type
-            },
-            input_file: {
-              icon_name: "bi:soundwave",
-              input_file_url: '',
-              styles: {
-                color: "c3d9ff"
+              title: fileName,
+              inputFile: newAudioFile.type,
+              fileType: newAudioFile.type, // Assuming fileType is the same as inputFile
+              Transcription: response.data.transcription || "Transcription not available", // Replace with actual transcription
+              duration: audio.duration || "-",
+              dateAndtime: new Date().toLocaleString(), // Get current date and time
+              audio: {
+                url: response.data.generated_speech_url,
+                type: newAudioFile.type
+              },
+              input_file: {
+                icon_name: "bi:soundwave",
+                input_file_url: '',
+                styles: {
+                  color: "c3d9ff"
+                }
+              },
+              item_type: {
+                icon_name: "ri:mic-fill",
+                styles: {
+                  backgroundColor: "#5A97FF",
+                  fontSize: 10,
+                  padding: 3,
+                  borderRadius: 50,
+                  color: "#fff"
+                }
               }
-            },
-            item_type: {
-              icon_name: "ri:mic-fill",
-              styles: {
-                backgroundColor: "#5A97FF",
-                fontSize: 10,
-                padding: 3,
-                borderRadius: 50,
-                color: "#fff"
-              }
-            }
-          });
+            });
 
-          // Dispatch the action to add the new body item
-         
-          handleOpen();
+            // Dispatch the action to add the new body item
+
+            handleOpen();
+          }
         }
-      }
       } catch (error) {
         setLoader(false);
 
@@ -180,7 +189,7 @@ const StoreData = ()=>{
   };
   const { header, body, actions } = useSelector((state) => state.data);
   const dispatch = useDispatch();
-  const recorder = (e) => {};
+  const recorder = (e) => { };
   console.log(file, "file");
   // useEffect(() => {
   //   // Fetch body data on component mount
@@ -517,7 +526,7 @@ const StoreData = ()=>{
           >
             Discard
           </Button>
-          <Button variant="contained" onClick={()=>StoreData()}>Save</Button>
+          <Button variant="contained" onClick={() => StoreData()}>Save</Button>
         </DialogActions>
       </Dialog>
     </div>

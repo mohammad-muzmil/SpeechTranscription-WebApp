@@ -9,13 +9,17 @@ import { Icon } from "@iconify/react";
 import React, { useState, useRef, useEffect } from "react";
 import ModalHeader from "./ModelHeader";
 
-const AudioRecorder = ({handleSubmit,ResetDefault}) => {
+import styles from './AudioRecorder.module.css'
+
+const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const [open, setOpen] = useState(false);
+  const [fileName, setFileName] = useState('NewRecording_' + new Date().getTime());
+  const [isEditing, setIsEditing] = useState(false); // New state for editing
 
   const handleClose = () => {
     console.log("HANDEL");
@@ -81,7 +85,28 @@ const AudioRecorder = ({handleSubmit,ResetDefault}) => {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
     }
-    
+
+  };
+
+
+  const reRecord = () => {
+    setAudioBlob(null);
+    setIsRecording(false)
+  }
+
+  const handleFileNameDoubleClick = () => {
+    setIsEditing(true); // Enable editing mode on double-click
+  };
+
+  const handleFileNameBlur = (event) => {
+    setFileName(event.target.value); // Save the new file name
+    setIsEditing(false); // Disable editing mode when moving out of input field
+  };
+
+
+  const handleChange = (e) => {
+    setFileName(e.target.value);
+    // setFileName(e.target.value);
   };
 
   return (
@@ -103,16 +128,71 @@ const AudioRecorder = ({handleSubmit,ResetDefault}) => {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              // paddingTop:5
             }}
           >
-            <p style={{ padding: "4px", fontSize: "14px", fontWeight: 500 }}>
-              New Recording
+            {isEditing ? (
+              <input
+                type="text"
+                value={fileName}
+                onChange={handleChange}
+                onBlur={handleFileNameBlur} // Handle when user moves out of input field
+                autoFocus
+                className={styles.onHoverButton}
+                style={{
+                  padding: "4px",
+                  fontSize: "11px",
+                  fontWeight: 500,
+                  color: "#646464",
+                  margin: 0,
+                }}
+              />
+            ) : (
+              <p
+                style={{
+                  padding: "4px",
+                  fontSize: "11px",
+                  fontWeight: 500,
+                  color: "#646464",
+                  margin: 0,
+                  cursor: "pointer",
+                }}
+                className={styles.onHoverButton}
+                onDoubleClick={handleFileNameDoubleClick} // Switch to input on double-click
+              >
+                File Name: {fileName}
+              </p>
+            )}
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <p
+              style={{
+                padding: "4px",
+                fontSize: "11px",
+                fontWeight: 500,
+                color: "#646464",
+              }}
+              className={styles.onHoverButton}
+              onClick={() => {
+                reRecord();
+              }}
+            >
+              Re-Record
             </p>
-            <p style={{ padding: "4px", fontSize: "14px", fontWeight: 500 }}>
-              File Recorded
-            </p>
-            <p style={{ padding: "4px", fontSize: "14px", fontWeight: 500 }}>
+            <p
+              style={{
+                padding: "4px",
+                fontSize: "11px",
+                fontWeight: 500,
+                color: "#646464",
+              }}
+            >
               Duration: {formatTime(recordingTime)}
             </p>
           </div>
@@ -127,11 +207,10 @@ const AudioRecorder = ({handleSubmit,ResetDefault}) => {
             variant="contained"
             onClick={async () => {
               if (audioBlob) {
-                await handleSubmit(audioBlob); // Wait for handleSubmit to complete
+                await handleSubmit({ fileName: fileName, audio: audioBlob }); // Wait for handleSubmit to complete
                 ResetDefault(); // Call ResetDefault after handleSubmit completes
               }
             }}
-            
           >
             Start Transcription
           </Button>
@@ -144,7 +223,6 @@ const AudioRecorder = ({handleSubmit,ResetDefault}) => {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              // justifyContent:"center"
             }}
           >
             <p
@@ -159,23 +237,50 @@ const AudioRecorder = ({handleSubmit,ResetDefault}) => {
             </p>
             <div>
               {!isRecording ? (
-                <Icon
-                  onClick={startRecording}
-                  icon="material-symbols:mic"
-                  width="38"
-                  height="38"
+                <div
                   style={{
-                    width: "34px", // Adjust as needed
-                    height: "34px", // Adjust as needed
-                    borderRadius: "50%", // Makes it circular
-                    color: "#0560FD",
-                    cursor: "pointer",
-                    border: "1px solid #0560FD",
-                    backgroundColor: "transparent",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
-                />
+                >
+                  <Icon
+                    onClick={startRecording}
+                    icon="material-symbols:mic"
+                    width="38"
+                    height="38"
+                    style={{
+                      width: "34px", // Adjust as needed
+                      height: "34px", // Adjust as needed
+                      borderRadius: "50%", // Makes it circular
+                      color: "#0560FD",
+                      cursor: "pointer",
+                      border: "1px solid #0560FD",
+                      backgroundColor: "transparent",
+                    }}
+                  />
+                  <p
+                    onClick={startRecording}
+                    style={{
+                      padding: "2px",
+                      fontSize: "12px",
+                      fontWeight: 500,
+                      color: "#646464",
+                    }}
+                  >
+                    Click on mic to start Recording
+                  </p>
+                </div>
               ) : (
-                <>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
                   {isRecording && <div>{formatTime(recordingTime)}</div>}
 
                   <Icon
@@ -190,33 +295,23 @@ const AudioRecorder = ({handleSubmit,ResetDefault}) => {
                       marginLeft: "10px",
                     }}
                   />
-                </>
+                  <p
+                    onClick={stopRecording}
+                    style={{
+                      padding: "2px",
+                      fontSize: "12px",
+                      fontWeight: 500,
+                      color: "#646464",
+                    }}
+                  >
+                    Click on icon to stop Recording
+                  </p>
+                </div>
               )}
             </div>
           </div>
         </>
       )}
-      {/* <Dialog
-        fullWidth
-        maxWidth={false}
-        open={open}
-        PaperProps={{
-          sx: { maxWidth: 720, borderRadius: "15px" },
-        }}
-      >
-        <ModalHeader heading="Audio Transcription" handleClose={handleClose} />
-        <DialogContent>
-          {audioBlob && (
-            <>
-              <p>Input Aduio</p>
-              <audio src={URL.createObjectURL(audioBlob)} controls />
-              <p>Transcripted Data</p>
-              <p>Transcripted Audio</p>
-            </>
-          )}
-        </DialogContent>
-        <DialogActions></DialogActions>
-      </Dialog> */}
     </>
   );
 };
