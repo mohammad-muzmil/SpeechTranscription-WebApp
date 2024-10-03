@@ -9,7 +9,7 @@ import { Icon } from "@iconify/react";
 import React, { useState, useRef, useEffect } from "react";
 import ModalHeader from "./ModelHeader";
 
-const AudioRecorder = () => {
+const AudioRecorder = ({handleSubmit,ResetDefault}) => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -81,16 +81,7 @@ const AudioRecorder = () => {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
     }
-  };
-
-  const sendToBackend = () => {
-    if (audioBlob) {
-      console.log("Sending audio blob to backend...");
-      // Example:
-      // const formData = new FormData();
-      // formData.append('audio', audioBlob, 'recording.webm');
-      // fetch('/api/upload-audio', { method: 'POST', body: formData });
-    }
+    
   };
 
   return (
@@ -134,9 +125,13 @@ const AudioRecorder = () => {
               marginTop: "6px",
             }}
             variant="contained"
-            onClick={() => {
-              handleOpen();
+            onClick={async () => {
+              if (audioBlob) {
+                await handleSubmit(audioBlob); // Wait for handleSubmit to complete
+                ResetDefault(); // Call ResetDefault after handleSubmit completes
+              }
             }}
+            
           >
             Start Transcription
           </Button>
@@ -149,6 +144,7 @@ const AudioRecorder = () => {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              // justifyContent:"center"
             }}
           >
             <p
@@ -179,24 +175,28 @@ const AudioRecorder = () => {
                   }}
                 />
               ) : (
-                <Icon
-                  onClick={stopRecording}
-                  className="bg-gray-500 hover:bg-gray-600"
-                  icon="fluent:record-stop-28-regular"
-                  width="38"
-                  height="38"
-                  style={{
-                    color: "red",
-                    cursor: "pointer",
-                  }}
-                />
+                <>
+                  {isRecording && <div>{formatTime(recordingTime)}</div>}
+
+                  <Icon
+                    onClick={stopRecording}
+                    className="bg-gray-500 hover:bg-gray-600"
+                    icon="fluent:record-stop-28-regular"
+                    width="38"
+                    height="38"
+                    style={{
+                      color: "red",
+                      cursor: "pointer",
+                      marginLeft: "10px",
+                    }}
+                  />
+                </>
               )}
-              {isRecording && <div>{formatTime(recordingTime)}</div>}
             </div>
           </div>
         </>
       )}
-      <Dialog
+      {/* <Dialog
         fullWidth
         maxWidth={false}
         open={open}
@@ -216,7 +216,7 @@ const AudioRecorder = () => {
           )}
         </DialogContent>
         <DialogActions></DialogActions>
-      </Dialog>
+      </Dialog> */}
     </>
   );
 };
