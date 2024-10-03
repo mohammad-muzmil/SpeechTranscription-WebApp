@@ -9,7 +9,7 @@ import Paper from "@mui/material/Paper";
 import { Icon } from "@iconify/react";
 import { Box, Tooltip } from "@mui/material";
 
-const BasicTable = ({ header, body, actions, metaData }) => {
+const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
   const headerStyles = {
     color: "#000000",
     fontWeight: 600,
@@ -23,6 +23,14 @@ const BasicTable = ({ header, body, actions, metaData }) => {
     fontWeight: 300,
   };
   const empty_space = "  ";
+
+
+  const actionClicked = (action, item) => {
+
+    if (actionEmitter) {
+      actionEmitter({ action, item })
+    }
+  }
 
   return (
     <TableContainer
@@ -44,6 +52,7 @@ const BasicTable = ({ header, body, actions, metaData }) => {
                 style={{
                   minWidth: column.minWidth,
                   ...headerStyles,
+                  ...column.customHeaderStyles || {}
                 }}
               >
                 {column.label}
@@ -87,6 +96,7 @@ const BasicTable = ({ header, body, actions, metaData }) => {
                       //   // justifyContent: 'start'
                       // })
                     }}
+                    onClick={() => actionEmitter ? actionEmitter({ action: { type: 'rowClick' }, header: column, data: row }) : {}}
                   >
 
                     {column?.type === 'text' && (
@@ -104,7 +114,8 @@ const BasicTable = ({ header, body, actions, metaData }) => {
                             icon={row?.[column?.icon_key]?.icon_name}
                             style={{
                               marginRight: '10px',
-                              ...(row?.[column?.icon_key]?.styles || {})
+                              ...(row?.[column?.icon_key]?.styles || {}),
+                              ...(column?.body_styles || {})
                             }}
                             cursor="pointer"
                           />
@@ -113,7 +124,7 @@ const BasicTable = ({ header, body, actions, metaData }) => {
                         {!column?.noText &&
 
 
-                          (<p style={{ padding: 0, margin: 0 }}>                      {row[column.key] ? row[column.key] : "-"}
+                          (<p style={{ padding: 0, margin: 0 }}>               {row[column.key] ? row[column.key] : "-"}
                           </p>)}      </div>
                     )
 
@@ -187,7 +198,7 @@ const BasicTable = ({ header, body, actions, metaData }) => {
                     {" "}
                     {/* You can adjust the gap value as needed */}
                     {actions.map((action) => (
-                      <Tooltip key={action.key} title={action.label} arrow>
+                      <Tooltip key={action.key} title={action.label} arrow onClick={() => { actionClicked(action, { ...row, ...{ internalIndex: index } }) }}>
                         <span>
                           <Icon
                             icon={action?.icon}

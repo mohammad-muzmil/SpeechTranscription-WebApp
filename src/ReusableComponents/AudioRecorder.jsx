@@ -19,15 +19,16 @@ const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
   const chunksRef = useRef([]);
   const [open, setOpen] = useState(false);
   const [fileName, setFileName] = useState('NewRecording_' + new Date().getTime());
-  const [isEditing, setIsEditing] = useState(false); // New state for editing
+  const [isEditing, setIsEditing] = useState(false);
 
   const handleClose = () => {
-    console.log("HANDEL");
     setOpen(!open);
   };
+
   const handleOpen = () => {
     setOpen(true);
   };
+
   useEffect(() => {
     let interval = null;
 
@@ -36,11 +37,11 @@ const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
       interval = setInterval(() => {
         setRecordingTime((prevTime) => prevTime + 1);
       }, 1000);
-    } else {
-      clearInterval(interval);
     }
 
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [isRecording]);
 
   const formatTime = (seconds) => {
@@ -55,8 +56,11 @@ const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
 
   const startRecording = async () => {
     try {
-      // Clear the previous audio blob before starting a new recording
-      // setAudioBlob(null);
+      // Check if browser supports audio recording
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.error("Media recording not supported in this browser.");
+        return;
+      }
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
@@ -84,29 +88,29 @@ const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+
+      // Stop all tracks to free up resources
+      const tracks = mediaRecorderRef.current.stream.getTracks();
+      tracks.forEach(track => track.stop());
     }
-
   };
-
 
   const reRecord = () => {
     setAudioBlob(null);
-    setIsRecording(false)
-  }
+    setIsRecording(false);
+  };
 
   const handleFileNameDoubleClick = () => {
-    setIsEditing(true); // Enable editing mode on double-click
+    setIsEditing(true);
   };
 
   const handleFileNameBlur = (event) => {
-    setFileName(event.target.value); // Save the new file name
-    setIsEditing(false); // Disable editing mode when moving out of input field
+    setFileName(event.target.value);
+    setIsEditing(false);
   };
-
 
   const handleChange = (e) => {
     setFileName(e.target.value);
-    // setFileName(e.target.value);
   };
 
   return (
@@ -115,12 +119,7 @@ const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
         <>
           <audio
             src={URL.createObjectURL(audioBlob)}
-            style={{
-              backgroundColor: "transparent", // Make the audio background transparent
-              height: "35px", // Adjust height to minimize space
-              width: "300px", // Set width as needed
-              outline: "none", // Remove outline
-            }}
+            className={styles.audioPlayer}
             controls
           />
           <div
@@ -135,7 +134,7 @@ const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
                 type="text"
                 value={fileName}
                 onChange={handleChange}
-                onBlur={handleFileNameBlur} // Handle when user moves out of input field
+                onBlur={handleFileNameBlur}
                 autoFocus
                 className={styles.onHoverButton}
                 style={{
@@ -157,7 +156,7 @@ const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
                   cursor: "pointer",
                 }}
                 className={styles.onHoverButton}
-                onDoubleClick={handleFileNameDoubleClick} // Switch to input on double-click
+                onDoubleClick={handleFileNameDoubleClick}
               >
                 File Name: {fileName}
               </p>
@@ -179,9 +178,7 @@ const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
                 color: "#646464",
               }}
               className={styles.onHoverButton}
-              onClick={() => {
-                reRecord();
-              }}
+              onClick={() => reRecord()}
             >
               Re-Record
             </p>
@@ -202,15 +199,23 @@ const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
+              borderRadius: '30px',
               marginTop: "6px",
             }}
             variant="contained"
             onClick={async () => {
               if (audioBlob) {
-                await handleSubmit({ fileName: fileName, audio: audioBlob }); // Wait for handleSubmit to complete
-                ResetDefault(); // Call ResetDefault after handleSubmit completes
+                try {
+                  await handleSubmit({
+                    fileName: fileName,
+                    recordedURL: URL.createObjectURL(audioBlob),
+                  });
+                } catch (error) {
+                  console.error("Error during submission:", error);
+                }
               }
             }}
+            disabled={!audioBlob}
           >
             Start Transcription
           </Button>
@@ -233,7 +238,7 @@ const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
                 marginTop: 10,
               }}
             >
-              {!isRecording ? "Start" : "Stop"} Recoding
+              {!isRecording ? "Start" : "Stop"} Recording
             </p>
             <div>
               {!isRecording ? (
@@ -251,9 +256,9 @@ const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
                     width="38"
                     height="38"
                     style={{
-                      width: "34px", // Adjust as needed
-                      height: "34px", // Adjust as needed
-                      borderRadius: "50%", // Makes it circular
+                      width: "34px",
+                      height: "34px",
+                      borderRadius: "50%",
                       color: "#0560FD",
                       cursor: "pointer",
                       border: "1px solid #0560FD",
@@ -285,7 +290,6 @@ const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
 
                   <Icon
                     onClick={stopRecording}
-                    className="bg-gray-500 hover:bg-gray-600"
                     icon="fluent:record-stop-28-regular"
                     width="38"
                     height="38"
