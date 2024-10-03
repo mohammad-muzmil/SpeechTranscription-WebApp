@@ -5,18 +5,24 @@ import BasicTable from "../ReusableComponents/BasicTable";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   Grid2,
+  Modal,
   Typography,
 } from "@mui/material";
 import AudioRecorder from "../ReusableComponents/AudioRecorder";
-import { addBodyItem, fetchBodyData } from "../store/TableSlice";
+import { addBodyItem, fetchBodyData, removeBodyItem } from "../store/TableSlice";
 import axios from "axios";
 import AudioLoader from "../ReusableComponents/AudioLoaders/AudioLoader";
 import ModalHeader from "../ReusableComponents/ModelHeader";
+
+
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 function ListingScreen() {
   const [active, setActive] = useState("upload");
@@ -24,6 +30,12 @@ function ListingScreen() {
   const [file, setFile] = useState(null);
   const [fileMetData, setFileMetaData] = useState({});
   const [loader, setLoader] = useState(false);
+  const [inputPlayerModal, setInputPlayerModal] = useState(false);
+  const [inputPlayerURL, setInputPlayerURL] = useState('')
+  const [transcriptionProcessData, setTranscriptionProcessData] = useState();
+  const [newBodyItem, setNewBodyItem] = useState({});
+  const [open, setOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const handleToggle = (option) => {
     setActive(option);
@@ -32,9 +44,13 @@ function ListingScreen() {
   const ResetDefault = () => {
     setIsRecording(false);
   };
-  console.log(fileMetData,"fileMetData",file,"file")
+
+
   const handleFile = (file) => {
     // Here you can add any validation or handling logic for the file
+
+    document.getElementById('fileInput').value = '';
+
     if (file.size <= 50 * 1024 * 1024) {
       setLoader(true);
 
@@ -76,7 +92,6 @@ function ListingScreen() {
     },
   };
 
-  const [transcriptionProcessData, setTranscriptionProcessData] = useState();
 
   // {
   //   "generated_speech_url": "https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3",
@@ -85,16 +100,63 @@ function ListingScreen() {
   //   "transcription_time": "6.19 seconds",
   //   "tts_generation_time": "11.68 seconds"
   // }
-const  [newBodyItem,setNewBodyItem]=useState({});
-const StoreData = ()=>{
-  dispatch(addBodyItem(newBodyItem));
-  setOpen(false)
-}
+  const StoreData = () => {
+
+    let data = newBodyItem;
+    data['title'] = fileMetData?.fileName;
+    data['input_file']['input_file_url'] = URL.createObjectURL(file)
+    dispatch(addBodyItem(data));
+    setOpen(false)
+  }
+
+
+  const handleDownload = async (dataInput) => {
+    try {
+      const zip = new JSZip();
+
+      // Add text content
+      const textContent = dataInput?.Transcription;
+      zip.file("transcription.txt", textContent);
+
+      // Add audio files (Assuming the audio files are in the `public` folder or URLs)
+      const audio1Url = dataInput?.input_file?.input_file_url; // Replace with your actual path
+      const audio2Url = dataInput?.audio?.url; // Replace with your actual path
+
+      // Fetch audio files as blobs
+      const audio1Blob = await fetch(audio1Url).then(res => res.blob());
+      const audio2Blob = await fetch(audio2Url).then(res => res.blob());
+
+      let newAudio = new Audio(dataInput)
+      // Add audio files to the ZIP
+      zip.file("input_file.mp3", audio1Blob);
+      zip.file("transcripted_output.mp3", audio2Blob);
+
+      // Generate the ZIP file and trigger download
+      zip.generateAsync({ type: "blob" }).then((content) => {
+        saveAs(content, dataInput?.title || 'Download' + ".zip");
+      });
+    } catch (error) {
+      console.error(error)
+    }
+  };
+
   const handleSubmit = async (audioFile) => {
     // event.preventDefault();
-    if (audioFile) {
+
+    setLoader(true);
+
+    let newAudioFile = audioFile?.recordedURL ? audioFile.recordedURL : audioFile;
+
+
+    if (audioFile?.recordedURL) {
+      const audio1Blob = await fetch(audioFile?.recordedURL).then(res => res.blob());
+      newAudioFile = audio1Blob;
+      setFile(audio1Blob)
+    }
+    let fileName = audioFile?.fileName ? audioFile.fileName : 'NewFile_' + new Date().getTime();
+    if (newAudioFile) {
       const formData = new FormData();
-      formData.append("audio", audioFile); // 'audio' is the key for the file
+      formData.append("audio", newAudioFile); // 'audio' is the key for the file
 
       try {
         const response = await axios.post(
@@ -113,51 +175,63 @@ const StoreData = ()=>{
         if (response?.data?.generated_speech_url) {
           setTranscriptionProcessData(response?.data);
 
-          let audio = new Audio(URL.createObjectURL(audioFile));
+          let audio = new Audio(URL.createObjectURL(newAudioFile));
           setFileMetaData({
-            fileName: "NewFile_" + new Date().getTime(),
+            fileName: fileName,
             duration: audio.duration || "-",
           });
           audio.onloadedmetadata = () => {
             setFileMetaData({
-              fileName: "NewFile_" + new Date().getTime(),
+              fileName: fileName,
               duration: audio.duration || "-",
             });
             setNewBodyItem({
-            title: "New Recording",
-            inputFile: audioFile.type,
-            fileType: audioFile.type, // Assuming fileType is the same as inputFile
-            Transcription: response.data.transcription || "Transcription not available", // Replace with actual transcription
-            duration: audio.duration || "-",
-            dateAndtime: new Date().toLocaleString(), // Get current date and time
-            audio: {
-              url: response.data.generated_speech_url,
-              type: audioFile.type
-            },
-            input_file: {
-              icon_name: "bi:soundwave",
-              input_file_url: '',
-              styles: {
-                color: "c3d9ff"
+              title: fileName,
+              inputFile: newAudioFile.type,
+              fileType: newAudioFile.type, // Assuming fileType is the same as inputFile
+              Transcription: response.data.transcription || "Transcription not available", // Replace with actual transcription
+              duration: audio.duration || "-",
+              dateAndtime: new Date().toLocaleString(), // Get current date and time
+              audio: {
+                url: response.data.generated_speech_url,
+                type: newAudioFile.type
+              },
+              input_file: {
+                icon_name: "bi:soundwave",
+                input_file_url: file ? URL.createObjectURL(file) : '',
+                styles: {
+                  color: "c3d9ff",
+                  fontSize: 15
+                }
+              },
+              item_type: audioFile?.recordedURL ? {
+                icon_name: "ri:mic-fill",
+                styles: {
+                  backgroundColor: "#5A97FF",
+                  fontSize: 15,
+                  padding: 3,
+                  borderRadius: 50,
+                  color: "#fff"
+                }
+              } : {
+                icon_name: "ic:baseline-upload",
+                styles: {
+                  backgroundColor: "#ff898b",
+                  fontSize: 15,
+                  padding: 3,
+                  borderRadius: 50,
+                  color: "#fff"
+                }
               }
-            },
-            item_type: {
-              icon_name: "ri:mic-fill",
-              styles: {
-                backgroundColor: "#5A97FF",
-                fontSize: 10,
-                padding: 3,
-                borderRadius: 50,
-                color: "#fff"
-              }
-            }
-          });
+            });
 
-          // Dispatch the action to add the new body item
-         
-          handleOpen();
+            // Dispatch the action to add the new body item
+
+            handleOpen();
+            setIsRecording(false)
+
+          }
         }
-      }
       } catch (error) {
         setLoader(false);
 
@@ -175,21 +249,22 @@ const StoreData = ()=>{
     setFileMetaData();
     setTranscriptionProcessData();
   };
+  const handleInputModalClose = () => {
+
+    setInputPlayerModal(false)
+  };
   const handleOpen = () => {
     setOpen(true);
   };
   const { header, body, actions } = useSelector((state) => state.data);
   const dispatch = useDispatch();
-  const recorder = (e) => {};
+  const recorder = (e) => { };
   console.log(file, "file");
   // useEffect(() => {
   //   // Fetch body data on component mount
   //   dispatch(fetchBodyData('POST','/processaudio',));
   // }, [dispatch]);
 
-  const [open, setOpen] = useState(false);
-
-  const [isEditing, setIsEditing] = useState(false);
 
   const handleFileNameClick = () => {
     setIsEditing(true);
@@ -205,6 +280,20 @@ const StoreData = ()=>{
     });
     // setFileName(e.target.value);
   };
+
+  const actionEmitter = (e) => {
+    console.log(e)
+    if (e?.action?.key === 'download') {
+      handleDownload(e?.item)
+    } else if (e?.action?.key === 'delete') {
+      // handleDownload(e?.item)
+
+      dispatch(removeBodyItem(e?.item))
+    } else if (e?.action?.type === 'rowClick') {
+      setInputPlayerURL(e?.data?.input_file?.input_file_url); setInputPlayerModal(true)
+      // open a modal to play input value
+    }
+  }
   return (
     <div className="container">
       <div className="top-section">
@@ -402,6 +491,7 @@ const StoreData = ()=>{
           body={body}
           actions={actions}
           metaData={metaInformation}
+          actionEmitter={actionEmitter}
         />
       </div>
       {loader && <AudioLoader />}
@@ -517,9 +607,69 @@ const StoreData = ()=>{
           >
             Discard
           </Button>
-          <Button variant="contained" onClick={()=>StoreData()}>Save</Button>
+          <Button variant="contained" onClick={() => StoreData()}>Save</Button>
         </DialogActions>
       </Dialog>
+
+
+
+      <Modal
+        open={inputPlayerModal}
+        onClose={handleInputModalClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          width: '100vw',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 1000
+        }}>
+          <Icon
+            icon="icon-park-solid:close-one" style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              cursor: 'pointer',
+              fontSize: '24px', // Adjust icon size
+              color: '#fff', // Change color as needed
+            }}
+            onClick={handleInputModalClose} // Close the modal when clicked
+          />
+          <div style={{
+            // backgroundColor: '#fff',
+            border: '0px solid #ccc',
+            width: "40%",
+
+            padding: '20px',
+            borderRadius: '8px',
+            // boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+            // position: 'relative' // Add position relative for positioning the close button
+          }}>
+
+            {/* <iconify-icon ></iconify-icon> */}
+
+            <audio
+              src={inputPlayerURL}
+              controls
+              style={{
+                backgroundColor: "transparent",
+                height: "50px",
+                width: "100%",
+                outline: "none",
+              }}
+            />
+          </div>
+        </div>
+      </Modal>
+
+
     </div>
   );
 }
