@@ -11,7 +11,7 @@ import ModalHeader from "./ModelHeader";
 
 import styles from './AudioRecorder.module.css'
 
-const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
+const AudioRecorder = ({ handleSubmit, ResetDefault ,getRecordTime}) => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -43,6 +43,10 @@ const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
       if (interval) clearInterval(interval);
     };
   }, [isRecording]);
+
+  useEffect(()=>{
+    getRecordTime(recordingTime);
+  },[isRecording])
 
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
@@ -228,6 +232,7 @@ const AudioRecorder = ({ handleSubmit, ResetDefault }) => {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              // justifyContent:"center"
             }}
           >
             <p

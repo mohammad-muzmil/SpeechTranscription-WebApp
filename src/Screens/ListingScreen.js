@@ -5,14 +5,11 @@ import BasicTable from "../ReusableComponents/BasicTable";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
-  Grid2,
   Modal,
-  Typography,
 } from "@mui/material";
 import AudioRecorder from "../ReusableComponents/AudioRecorder";
 import { addBodyItem, fetchBodyData, removeBodyItem } from "../store/TableSlice";
@@ -36,7 +33,7 @@ function ListingScreen() {
   const [newBodyItem, setNewBodyItem] = useState({});
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-
+  const [audioTime,setAudioTime] = useState(null);
   const handleToggle = (option) => {
     setActive(option);
   };
@@ -45,6 +42,19 @@ function ListingScreen() {
     setIsRecording(false);
   };
 
+  const getRecordTime=(time)=>{
+    setAudioTime(time)
+  }
+
+  const formatTime = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+      2,
+      "0"
+    )}:${String(secs).padStart(2, "0")}`;
+  };
 
   const handleFile = (file) => {
     // Here you can add any validation or handling logic for the file
@@ -178,19 +188,19 @@ function ListingScreen() {
           let audio = new Audio(URL.createObjectURL(newAudioFile));
           setFileMetaData({
             fileName: fileName,
-            duration: audio.duration || "-",
+            duration: formatTime(audioTime) || "-",
           });
           audio.onloadedmetadata = () => {
             setFileMetaData({
               fileName: fileName,
-              duration: audio.duration || "-",
+              duration: formatTime(audioTime) || "-",
             });
             setNewBodyItem({
               title: fileName,
               inputFile: newAudioFile.type,
               fileType: newAudioFile.type, // Assuming fileType is the same as inputFile
               Transcription: response.data.transcription || "Transcription not available", // Replace with actual transcription
-              duration: audio.duration || "-",
+              duration: formatTime(audioTime) || "-",
               dateAndtime: new Date().toLocaleString(), // Get current date and time
               audio: {
                 url: response.data.generated_speech_url,
@@ -413,6 +423,7 @@ function ListingScreen() {
                       <AudioRecorder
                         handleSubmit={handleSubmit}
                         ResetDefault={ResetDefault}
+                        getRecordTime={getRecordTime}
                       />
                     </>
                   ) : (
@@ -547,7 +558,7 @@ function ListingScreen() {
                       {fileMetData?.fileName}
                     </span>
                   )}
-                  <span>Duration: {fileMetData?.duration}</span>
+                  <span>Duration: {formatTime(audioTime)}</span>
                 </div>
               </div>
               <div
