@@ -23,16 +23,21 @@ function ListingScreen() {
   const [isRecording, setIsRecording] = useState(false);
   const [file, setFile] = useState(null);
   const [fileMetData, setFileMetaData] = useState({});
+  const [audioTime,setAudioTime] = useState(null);
   const [loader, setLoader] = useState(false);
 
   const handleToggle = (option) => {
     setActive(option);
   };
 
+  const getRecordTime = (time)=>{
+    setAudioTime(time);
+  }
   const ResetDefault = () => {
     setIsRecording(false);
   };
   console.log(fileMetData,"fileMetData",file,"file")
+  console.log(audioTime,'audioTime')
   const handleFile = (file) => {
     // Here you can add any validation or handling logic for the file
     if (file.size <= 50 * 1024 * 1024) {
@@ -90,6 +95,16 @@ const StoreData = ()=>{
   dispatch(addBodyItem(newBodyItem));
   setOpen(false)
 }
+
+const formatTime = (seconds) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+    2,
+    "0"
+  )}:${String(secs).padStart(2, "0")}`;
+};
   const handleSubmit = async (audioFile) => {
     // event.preventDefault();
     if (audioFile) {
@@ -128,7 +143,7 @@ const StoreData = ()=>{
             inputFile: audioFile.type,
             fileType: audioFile.type, // Assuming fileType is the same as inputFile
             Transcription: response.data.transcription || "Transcription not available", // Replace with actual transcription
-            duration: audio.duration || "-",
+            duration: formatTime(audioTime) || "-",
             dateAndtime: new Date().toLocaleString(), // Get current date and time
             audio: {
               url: response.data.generated_speech_url,
@@ -324,6 +339,7 @@ const StoreData = ()=>{
                       <AudioRecorder
                         handleSubmit={handleSubmit}
                         ResetDefault={ResetDefault}
+                        getRecordTime={getRecordTime}
                       />
                     </>
                   ) : (
@@ -457,7 +473,7 @@ const StoreData = ()=>{
                       {fileMetData?.fileName}
                     </span>
                   )}
-                  <span>Duration: {fileMetData?.duration}</span>
+                  <span>Duration: {formatTime(audioTime)}</span>
                 </div>
               </div>
               <div

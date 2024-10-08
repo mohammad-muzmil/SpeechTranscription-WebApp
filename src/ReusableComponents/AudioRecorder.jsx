@@ -9,7 +9,7 @@ import { Icon } from "@iconify/react";
 import React, { useState, useRef, useEffect } from "react";
 import ModalHeader from "./ModelHeader";
 
-const AudioRecorder = ({handleSubmit,ResetDefault}) => {
+const AudioRecorder = ({handleSubmit,ResetDefault,getRecordTime}) => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -38,6 +38,10 @@ const AudioRecorder = ({handleSubmit,ResetDefault}) => {
 
     return () => clearInterval(interval);
   }, [isRecording]);
+
+  useEffect(()=>{
+    getRecordTime(recordingTime);
+  },[isRecording])
 
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
