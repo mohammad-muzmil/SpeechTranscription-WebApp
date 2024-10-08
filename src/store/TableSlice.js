@@ -1,4 +1,4 @@
-import { createSlice ,createAsyncThunk} from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const initialState = {
@@ -8,7 +8,10 @@ const initialState = {
       label: "Title",
       type: "text",
       subType: "",
-      icon_key: "item_type"
+      icon_key: "item_type",
+      customHeaderStyles: {
+        minWidth: "100px"
+      }
     },
     {
       key: "inputFile",
@@ -16,40 +19,64 @@ const initialState = {
       type: "text",
       subType: "voice_wave",
       icon_key: "input_file",
-      noText: true
+      onClickEmittToParent: true,
+      body_styles: {
+        fontSize: 25,
+        color: '#669EFF'
+      },
+      noText: true,
+      customHeaderStyles: {
+        minWidth: "70px"
+      }
     },
     {
       key: "fileType",
       label: "File Type",
       type: "text",
       subType: "",
+      customHeaderStyles: {
+        minWidth: "70px"
+      }
     },
     {
       key: "Transcription",
       label: "Transcription",
       type: "text",
       subType: "",
+      customHeaderStyles: {
+        minWidth: "150px"
+      }
     },
+
     {
       key: "duration",
       label: "Duration",
       type: "text",
       subType: "",
+      customHeaderStyles: {
+        minWidth: "70px"
+      }
     },
     {
       key: "dateAndtime",
       label: "Date & Time",
       type: "dateAndtime",
       subType: "",
+      customHeaderStyles: {
+        minWidth: "100px"
+      }
     },
     {
       key: "play",
       label: "Play",
       type: "audio",
       subType: "",
+      customHeaderStyles: {
+        minWidth: "150px"
+      }
     },
   ],
-  body:[],
+  body: [],
   bodyTest: [
     {
       title: "New Recording",
@@ -59,8 +86,8 @@ const initialState = {
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       audio: {
-        url:"https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
-        type:".mp3"
+        url: "https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
+        type: ".mp3"
       },
       input_file: {
         icon_name: "bi:soundwave",
@@ -77,7 +104,7 @@ const initialState = {
         icon_name: "ri:mic-fill",
         styles: {
           backgroundColor: "#5A97FF",
-          fontSize: 10,
+          fontSize: 30,
           padding: 3,
           borderRadius: 50,
           color: "#fff"
@@ -331,11 +358,22 @@ const TableSlice = createSlice({
       state.body.push(action.payload);
     },
     // Add more reducers as needed
+    removeBodyItem: (state, action) => {
+      if (window.confirm(`Are you sure you want to delete ${action.payload?.title} record?`)) {
+        state.body.splice(action.payload.internalIndex, 1); // The second parameter specifies the number of elements to remove
+        // alert(`Element deleted. Updated array: ${array}`);
+      } else {
+        alert('Deletion canceled.');
+      }
+
+      // console.log(action, state.body)
+      // state.body.push(action.payload);
+    },
   },
- 
+
 });
 
-export const { updateBody, addBodyItem } = TableSlice.actions;
+export const { updateBody, addBodyItem, removeBodyItem } = TableSlice.actions;
 export default TableSlice.reducer;
 
 // extraReducers: (builder) => {
