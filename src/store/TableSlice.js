@@ -346,7 +346,6 @@ const initialState = {
     },
   ],
 };
-
 const TableSlice = createSlice({
   name: 'data',
   initialState,
