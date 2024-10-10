@@ -12,11 +12,14 @@ import {
   Modal,
 } from "@mui/material";
 import AudioRecorder from "../ReusableComponents/AudioRecorder";
-import { addBodyItem, fetchBodyData, removeBodyItem } from "../store/TableSlice";
+import {
+  addBodyItem,
+  fetchBodyData,
+  removeBodyItem,
+} from "../store/TableSlice";
 import axios from "axios";
 import AudioLoader from "../ReusableComponents/AudioLoaders/AudioLoader";
 import ModalHeader from "../ReusableComponents/ModelHeader";
-
 
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -28,12 +31,12 @@ function ListingScreen() {
   const [fileMetData, setFileMetaData] = useState({});
   const [loader, setLoader] = useState(false);
   const [inputPlayerModal, setInputPlayerModal] = useState(false);
-  const [inputPlayerURL, setInputPlayerURL] = useState('')
+  const [inputPlayerURL, setInputPlayerURL] = useState("");
   const [transcriptionProcessData, setTranscriptionProcessData] = useState();
   const [newBodyItem, setNewBodyItem] = useState({});
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [audioTime,setAudioTime] = useState(null);
+  const [audioTime, setAudioTime] = useState(null);
   const handleToggle = (option) => {
     setActive(option);
   };
@@ -42,9 +45,9 @@ function ListingScreen() {
     setIsRecording(false);
   };
 
-  const getRecordTime=(time)=>{
-    setAudioTime(time)
-  }
+  const getRecordTime = (time) => {
+    setAudioTime(time);
+  };
 
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
@@ -59,7 +62,7 @@ function ListingScreen() {
   const handleFile = (file) => {
     // Here you can add any validation or handling logic for the file
 
-    document.getElementById('fileInput').value = '';
+    document.getElementById("fileInput").value = "";
 
     if (file.size <= 50 * 1024 * 1024) {
       setLoader(true);
@@ -102,7 +105,6 @@ function ListingScreen() {
     },
   };
 
-
   // {
   //   "generated_speech_url": "https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3",
   //   "total_response_time": "17.87 seconds",
@@ -111,14 +113,12 @@ function ListingScreen() {
   //   "tts_generation_time": "11.68 seconds"
   // }
   const StoreData = () => {
-
     let data = newBodyItem;
-    data['title'] = fileMetData?.fileName;
-    data['input_file']['input_file_url'] = URL.createObjectURL(file)
+    data["title"] = fileMetData?.fileName;
+    data["input_file"]["input_file_url"] = URL.createObjectURL(file);
     dispatch(addBodyItem(data));
-    setOpen(false)
-  }
-
+    setOpen(false);
+  };
 
   const handleDownload = async (dataInput) => {
     try {
@@ -133,37 +133,66 @@ function ListingScreen() {
       const audio2Url = dataInput?.audio?.url; // Replace with your actual path
 
       // Fetch audio files as blobs
-      const audio1Blob = await fetch(audio1Url).then(res => res.blob());
-      const audio2Blob = await fetch(audio2Url).then(res => res.blob());
+      const audio1Blob = await fetch(audio1Url).then((res) => res.blob());
+      const audio2Blob = await fetch(audio2Url).then((res) => res.blob());
 
-      let newAudio = new Audio(dataInput)
+      let newAudio = new Audio(dataInput);
       // Add audio files to the ZIP
       zip.file("input_file.mp3", audio1Blob);
       zip.file("transcripted_output.mp3", audio2Blob);
 
       // Generate the ZIP file and trigger download
       zip.generateAsync({ type: "blob" }).then((content) => {
-        saveAs(content, dataInput?.title || 'Download' + ".zip");
+        saveAs(content, dataInput?.title || "Download" + ".zip");
       });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   };
+  async function fetchAudioAsBlob(url) {
+    try {
+      // Fetch the audio file from the URL
+      const response = await fetch(url);
 
+      // Check if the response is okay
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      // Convert the response to a Blob
+      const audioBlob = await response.blob();
+
+      // Create a URL for the Blob
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      // You can return the audio URL or the Blob, depending on your needs
+      return {
+        audioBlob,
+        audioUrl,
+      };
+    } catch (error) {
+      console.error("Error fetching audio:", error);
+    }
+  }
   const handleSubmit = async (audioFile) => {
     // event.preventDefault();
 
     setLoader(true);
 
-    let newAudioFile = audioFile?.recordedURL ? audioFile.recordedURL : audioFile;
-
+    let newAudioFile = audioFile?.recordedURL
+      ? audioFile.recordedURL
+      : audioFile;
 
     if (audioFile?.recordedURL) {
-      const audio1Blob = await fetch(audioFile?.recordedURL).then(res => res.blob());
+      const audio1Blob = await fetch(audioFile?.recordedURL).then((res) =>
+        res.blob()
+      );
       newAudioFile = audio1Blob;
-      setFile(audio1Blob)
+      setFile(audio1Blob);
     }
-    let fileName = audioFile?.fileName ? audioFile.fileName : 'NewFile_' + new Date().getTime();
+    let fileName = audioFile?.fileName
+      ? audioFile.fileName
+      : "NewFile_" + new Date().getTime();
     if (newAudioFile) {
       const formData = new FormData();
       formData.append("audio", newAudioFile); // 'audio' is the key for the file
@@ -184,7 +213,13 @@ function ListingScreen() {
 
         if (response?.data?.generated_speech_url) {
           setTranscriptionProcessData(response?.data);
-
+         let outPutAudio = await fetchAudioAsBlob(response?.data?.generated_speech_url).then(
+            ({ audioBlob, audioUrl }) => {
+              console.log("Blob:", audioBlob);
+              console.log("Audio URL:", audioUrl);
+              return { audioBlob: audioBlob, audioUrl: audioUrl }
+            }
+          );
           let audio = new Audio(URL.createObjectURL(newAudioFile));
           setFileMetaData({
             fileName: fileName,
@@ -195,52 +230,57 @@ function ListingScreen() {
               fileName: fileName,
               duration: formatTime(audioTime) || "-",
             });
+
+            // STEP DOWNLOAD BLOB FOR URL, Make it URL Again using new Audio(URL.createObjectURL())
+
             setNewBodyItem({
               title: fileName,
               inputFile: newAudioFile.type,
               fileType: newAudioFile.type, // Assuming fileType is the same as inputFile
-              Transcription: response.data.transcription || "Transcription not available", // Replace with actual transcription
+              Transcription:
+                response.data.transcription || "Transcription not available", // Replace with actual transcription
               duration: formatTime(audioTime) || "-",
               dateAndtime: new Date().toLocaleString(), // Get current date and time
               audio: {
-                url: response.data.generated_speech_url,
-                type: newAudioFile.type
+                url: outPutAudio?.audioUrl,
+                type: newAudioFile.type,
               },
               input_file: {
                 icon_name: "bi:soundwave",
-                input_file_url: file ? URL.createObjectURL(file) : '',
+                input_file_url: file ? URL.createObjectURL(file) : "",
                 styles: {
                   color: "c3d9ff",
-                  fontSize: 15
-                }
+                  fontSize: 15,
+                },
               },
-              item_type: audioFile?.recordedURL ? {
-                icon_name: "ri:mic-fill",
-                styles: {
-                  backgroundColor: "#5A97FF",
-                  fontSize: 15,
-                  padding: 3,
-                  borderRadius: 50,
-                  color: "#fff"
-                }
-              } : {
-                icon_name: "ic:baseline-upload",
-                styles: {
-                  backgroundColor: "#ff898b",
-                  fontSize: 15,
-                  padding: 3,
-                  borderRadius: 50,
-                  color: "#fff"
-                }
-              }
+              item_type: audioFile?.recordedURL
+                ? {
+                    icon_name: "ri:mic-fill",
+                    styles: {
+                      backgroundColor: "#5A97FF",
+                      fontSize: 15,
+                      padding: 3,
+                      borderRadius: 50,
+                      color: "#fff",
+                    },
+                  }
+                : {
+                    icon_name: "ic:baseline-upload",
+                    styles: {
+                      backgroundColor: "#ff898b",
+                      fontSize: 15,
+                      padding: 3,
+                      borderRadius: 50,
+                      color: "#fff",
+                    },
+                  },
             });
 
             // Dispatch the action to add the new body item
 
             handleOpen();
-            setIsRecording(false)
-
-          }
+            setIsRecording(false);
+          };
         }
       } catch (error) {
         setLoader(false);
@@ -260,21 +300,19 @@ function ListingScreen() {
     setTranscriptionProcessData();
   };
   const handleInputModalClose = () => {
-
-    setInputPlayerModal(false)
+    setInputPlayerModal(false);
   };
   const handleOpen = () => {
     setOpen(true);
   };
   const { header, body, actions } = useSelector((state) => state.data);
   const dispatch = useDispatch();
-  const recorder = (e) => { };
+  const recorder = (e) => {};
   console.log(file, "file");
   // useEffect(() => {
   //   // Fetch body data on component mount
   //   dispatch(fetchBodyData('POST','/processaudio',));
   // }, [dispatch]);
-
 
   const handleFileNameClick = () => {
     setIsEditing(true);
@@ -292,18 +330,21 @@ function ListingScreen() {
   };
 
   const actionEmitter = (e) => {
-    console.log(e)
-    if (e?.action?.key === 'download') {
-      handleDownload(e?.item)
-    } else if (e?.action?.key === 'delete') {
+    console.log(e);
+    if (e?.action?.key === "download") {
+      handleDownload(e?.item);
+      console.log(e?.item,"e?.item");
+      
+    } else if (e?.action?.key === "delete") {
       // handleDownload(e?.item)
 
-      dispatch(removeBodyItem(e?.item))
-    } else if (e?.action?.type === 'rowClick') {
-      setInputPlayerURL(e?.data?.input_file?.input_file_url); setInputPlayerModal(true)
+      dispatch(removeBodyItem(e?.item));
+    } else if (e?.action?.type === "rowClick") {
+      setInputPlayerURL(e?.data?.input_file?.input_file_url);
+      setInputPlayerModal(true);
       // open a modal to play input value
     }
-  }
+  };
   return (
     <div className="container">
       <div className="top-section">
@@ -618,11 +659,11 @@ function ListingScreen() {
           >
             Discard
           </Button>
-          <Button variant="contained" onClick={() => StoreData()}>Save</Button>
+          <Button variant="contained" onClick={() => StoreData()}>
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
-
-
 
       <Modal
         open={inputPlayerModal}
@@ -630,40 +671,44 @@ function ListingScreen() {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          width: '100vw',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 1000
-        }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100vh",
+            width: "100vw",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 1000,
+          }}
+        >
           <Icon
-            icon="icon-park-solid:close-one" style={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              cursor: 'pointer',
-              fontSize: '24px', // Adjust icon size
-              color: '#fff', // Change color as needed
+            icon="icon-park-solid:close-one"
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "10px",
+              cursor: "pointer",
+              fontSize: "24px", // Adjust icon size
+              color: "#fff", // Change color as needed
             }}
             onClick={handleInputModalClose} // Close the modal when clicked
           />
-          <div style={{
-            // backgroundColor: '#fff',
-            border: '0px solid #ccc',
-            width: "40%",
+          <div
+            style={{
+              // backgroundColor: '#fff',
+              border: "0px solid #ccc",
+              width: "40%",
 
-            padding: '20px',
-            borderRadius: '8px',
-            // boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-            // position: 'relative' // Add position relative for positioning the close button
-          }}>
-
+              padding: "20px",
+              borderRadius: "8px",
+              // boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+              // position: 'relative' // Add position relative for positioning the close button
+            }}
+          >
             {/* <iconify-icon ></iconify-icon> */}
 
             <audio
@@ -679,8 +724,6 @@ function ListingScreen() {
           </div>
         </div>
       </Modal>
-
-
     </div>
   );
 }

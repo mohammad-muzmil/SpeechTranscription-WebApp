@@ -96,7 +96,7 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                       //   // justifyContent: 'start'
                       // })
                     }}
-                    onClick={() => actionEmitter ? actionEmitter({ action: { type: 'rowClick' }, header: column, data: row }) : {}}
+                    onClick={() => (actionEmitter && column?.onClickEmittToParent) ? actionEmitter({ action: { type: 'rowClick' }, header: column, data: row }) : {}}
                   >
 
                     {column?.type === 'text' && (
