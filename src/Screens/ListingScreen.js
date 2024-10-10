@@ -199,7 +199,7 @@ function ListingScreen() {
 
       try {
         const response = await axios.post(
-          "http://192.168.0.182:5050/process_audio",
+          "https://192.168.0.182:5050/process_audio",
           formData,
           {
             headers: {
