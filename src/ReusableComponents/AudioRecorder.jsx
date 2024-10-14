@@ -9,16 +9,18 @@ import { Icon } from "@iconify/react";
 import React, { useState, useRef, useEffect } from "react";
 import ModalHeader from "./ModelHeader";
 
-import styles from './AudioRecorder.module.css'
+import styles from "./AudioRecorder.module.css";
 
-const AudioRecorder = ({ handleSubmit, ResetDefault ,getRecordTime}) => {
+const AudioRecorder = ({ handleSubmit, ResetDefault, getRecordTime }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const [open, setOpen] = useState(false);
-  const [fileName, setFileName] = useState('NewRecording_' + new Date().getTime());
+  const [fileName, setFileName] = useState(
+    "NewRecording_" + new Date().getTime()
+  );
   const [isEditing, setIsEditing] = useState(false);
 
   const handleClose = () => {
@@ -44,9 +46,9 @@ const AudioRecorder = ({ handleSubmit, ResetDefault ,getRecordTime}) => {
     };
   }, [isRecording]);
 
-  useEffect(()=>{
+  useEffect(() => {
     getRecordTime(recordingTime);
-  },[isRecording])
+  }, [isRecording]);
 
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
@@ -95,7 +97,7 @@ const AudioRecorder = ({ handleSubmit, ResetDefault ,getRecordTime}) => {
 
       // Stop all tracks to free up resources
       const tracks = mediaRecorderRef.current.stream.getTracks();
-      tracks.forEach(track => track.stop());
+      tracks.forEach((track) => track.stop());
     }
   };
 
@@ -203,7 +205,7 @@ const AudioRecorder = ({ handleSubmit, ResetDefault ,getRecordTime}) => {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              borderRadius: '30px',
+              borderRadius: "30px",
               marginTop: "6px",
             }}
             variant="contained"

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./ListingScreen.css"; // Import the CSS file for styling
 import logoPng from "./../assets/images/logo.png";
 import BasicTable from "../ReusableComponents/BasicTable";
@@ -37,10 +37,21 @@ function ListingScreen() {
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [audioTime, setAudioTime] = useState(null);
+  const [dailogActions, setDailogActions] = useState(true);
   const handleToggle = (option) => {
     setActive(option);
   };
+  const currentAudioRef = useRef(null);
+  const handleAudioPlay = (event) => {
+    // If there's already an audio playing, pause it
+    if (currentAudioRef.current && currentAudioRef.current !== event.target) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current.currentTime = 0; // Reset time if you want
+    }
 
+    // Update the reference to the currently playing audio
+    currentAudioRef.current = event.target;
+  };
   const ResetDefault = () => {
     setIsRecording(false);
   };
@@ -48,7 +59,7 @@ function ListingScreen() {
   const getRecordTime = (time) => {
     setAudioTime(time);
   };
-
+  console.log(dailogActions, "dailogActions");
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -199,7 +210,7 @@ function ListingScreen() {
 
       try {
         const response = await axios.post(
-          "https://192.168.0.182:5050/process_audio",
+          "http://192.168.1.81:5050/process_audio",
           formData,
           {
             headers: {
@@ -213,33 +224,41 @@ function ListingScreen() {
 
         if (response?.data?.generated_speech_url) {
           setTranscriptionProcessData(response?.data);
-         let outPutAudio = await fetchAudioAsBlob(response?.data?.generated_speech_url).then(
-            ({ audioBlob, audioUrl }) => {
-              console.log("Blob:", audioBlob);
-              console.log("Audio URL:", audioUrl);
-              return { audioBlob: audioBlob, audioUrl: audioUrl }
-            }
-          );
+          let outPutAudio = await fetchAudioAsBlob(
+            response?.data?.generated_speech_url
+          ).then(({ audioBlob, audioUrl }) => {
+            console.log("Blob:", audioBlob);
+            console.log("Audio URL:", audioUrl);
+            return { audioBlob: audioBlob, audioUrl: audioUrl };
+          });
           let audio = new Audio(URL.createObjectURL(newAudioFile));
+
           setFileMetaData({
             fileName: fileName,
             duration: formatTime(audioTime) || "-",
           });
+          console.log(audioTime, "audioTime");
+
           audio.onloadedmetadata = () => {
             setFileMetaData({
               fileName: fileName,
-              duration: formatTime(audioTime) || "-",
+              duration: audioTime
+                ? formatTime(audioTime)
+                : audio?.duration || "-",
             });
-
+            const duration = Math.floor(audio?.duration); // Truncate to whole seconds
+            console.log(`Audio duration: ${duration} seconds`);
             // STEP DOWNLOAD BLOB FOR URL, Make it URL Again using new Audio(URL.createObjectURL())
 
             setNewBodyItem({
-              title: fileName,
-              inputFile: newAudioFile.type,
+              // title: fileName,
+              inputFile: fileName,
               fileType: newAudioFile.type, // Assuming fileType is the same as inputFile
               Transcription:
                 response.data.transcription || "Transcription not available", // Replace with actual transcription
-              duration: formatTime(audioTime) || "-",
+              duration: audioTime
+                ? formatTime(audioTime)
+                : formatTime(duration) || "-",
               dateAndtime: new Date().toLocaleString(), // Get current date and time
               audio: {
                 url: outPutAudio?.audioUrl,
@@ -275,10 +294,10 @@ function ListingScreen() {
                     },
                   },
             });
-
+            setAudioTime(null);
             // Dispatch the action to add the new body item
 
-            handleOpen();
+            handleOpen("View");
             setIsRecording(false);
           };
         }
@@ -293,17 +312,24 @@ function ListingScreen() {
     }
   };
 
-  const handleClose = () => {
-    console.log("HANDEL");
+  const handleClose = (type) => {
     setOpen(!open);
-    setFileMetaData();
-    setTranscriptionProcessData();
+
+    console.log(type, "type");
+    // if (type === "clear") {
+    //   setFileMetaData();
+
+    // }
   };
+
   const handleInputModalClose = () => {
     setInputPlayerModal(false);
   };
-  const handleOpen = () => {
+  const handleOpen = (type) => {
     setOpen(true);
+    if (type === "View") {
+      setDailogActions(true);
+    }
   };
   const { header, body, actions } = useSelector((state) => state.data);
   const dispatch = useDispatch();
@@ -333,8 +359,7 @@ function ListingScreen() {
     console.log(e);
     if (e?.action?.key === "download") {
       handleDownload(e?.item);
-      console.log(e?.item,"e?.item");
-      
+      console.log(e?.item, "e?.item");
     } else if (e?.action?.key === "delete") {
       // handleDownload(e?.item)
 
@@ -343,6 +368,21 @@ function ListingScreen() {
       setInputPlayerURL(e?.data?.input_file?.input_file_url);
       setInputPlayerModal(true);
       // open a modal to play input value
+    } else if (e?.action?.type === "openModel") {
+      setDailogActions(false);
+      console.log(e?.data, "dataaa");
+      setTranscriptionProcessData({
+        transcription: e?.data?.Transcription,
+        generated_speech_url: e?.data?.audio?.url,
+        input_audio: e?.data?.input_file?.input_file_url,
+        duration: e?.data?.duration,
+        fileName: e?.data?.inputFile,
+      });
+      setFileMetaData({
+        fileName: e?.data?.inputFile,
+        duration: e?.data?.duration,
+      });
+      handleOpen();
     }
   };
   return (
@@ -439,7 +479,11 @@ function ListingScreen() {
 
                     <div className="uploaderContentSection">
                       Drag & drop files or{" "}
-                      <label className="browseButtonStyle" htmlFor="fileInput">
+                      <label
+                        className="browseButtonStyle"
+                        htmlFor="fileInput"
+                        style={{ cursor: "pointer" }}
+                      >
                         Browse
                       </label>
                       <input
@@ -556,7 +600,7 @@ function ListingScreen() {
           sx: { maxWidth: 720, borderRadius: "15px" },
         }}
       >
-        <ModalHeader heading="Audio Transcription" />
+        <ModalHeader heading="Audio Transcription" handleClose={handleClose} />
         <DialogContent>
           {transcriptionProcessData && (
             <>
@@ -566,7 +610,11 @@ function ListingScreen() {
                 Input Audio
               </p>
               <audio
-                src={file ? URL.createObjectURL(file) : ""}
+                src={
+                  file
+                    ? URL.createObjectURL(file)
+                    : transcriptionProcessData?.input_audio
+                }
                 controls
                 style={{
                   backgroundColor: "transparent",
@@ -574,6 +622,7 @@ function ListingScreen() {
                   width: "100%",
                   outline: "none",
                 }}
+                onPlay={handleAudioPlay}
               />
               <div className="flexProperties" style={{ justifyContent: "end" }}>
                 <div className="flexProperties modal_text">
@@ -599,7 +648,10 @@ function ListingScreen() {
                       {fileMetData?.fileName}
                     </span>
                   )}
-                  <span>Duration: {formatTime(audioTime)}</span>
+                  <span>
+                    Duration:{" "}
+                    {audioTime ? formatTime(audioTime) : fileMetData?.duration}
+                  </span>
                 </div>
               </div>
               <div
@@ -623,7 +675,7 @@ function ListingScreen() {
                 </span>
               </div>
               <p style={{ fontSize: "20px", fontWeight: 600, margin: 0 }}>
-                {transcriptionProcessData.transcription}
+                {transcriptionProcessData?.transcription}
               </p>
               <p
                 style={{
@@ -645,23 +697,38 @@ function ListingScreen() {
                   width: "100%",
                   outline: "none",
                 }}
+                onPlay={handleAudioPlay}
               />
             </>
           )}
         </DialogContent>
         <DialogActions>
-          <Button
-            variant="contained"
-            sx={{ backgroundColor: "#303030" }}
-            onClick={() => {
-              handleClose();
-            }}
-          >
-            Discard
-          </Button>
-          <Button variant="contained" onClick={() => StoreData()}>
-            Save
-          </Button>
+          {dailogActions ? (
+            <>
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "#303030" }}
+                onClick={() => {
+                  handleClose("clear");
+                }}
+              >
+                Discard
+              </Button>
+              <Button variant="contained" onClick={() => StoreData()}>
+                Save
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="contained"
+              sx={{ backgroundColor: "#303030" }}
+              onClick={() => {
+                handleClose();
+              }}
+            >
+              Close
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
 
