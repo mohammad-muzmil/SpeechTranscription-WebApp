@@ -160,8 +160,15 @@ function ListingScreen() {
       console.error(error);
     }
   };
+  let previousAudioUrl = null;
+
   async function fetchAudioAsBlob(url) {
     try {
+      // Clear previous audio URL if it exists
+      if (previousAudioUrl) {
+        URL.revokeObjectURL(previousAudioUrl);
+      }
+
       // Fetch the audio file from the URL
       const response = await fetch(url);
 
@@ -176,6 +183,9 @@ function ListingScreen() {
       // Create a URL for the Blob
       const audioUrl = URL.createObjectURL(audioBlob);
 
+      // Store the new audio URL
+      previousAudioUrl = audioUrl;
+
       // You can return the audio URL or the Blob, depending on your needs
       return {
         audioBlob,
@@ -185,6 +195,7 @@ function ListingScreen() {
       console.error("Error fetching audio:", error);
     }
   }
+
   const handleSubmit = async (audioFile) => {
     // event.preventDefault();
 
@@ -249,7 +260,10 @@ function ListingScreen() {
             const duration = Math.floor(audio?.duration); // Truncate to whole seconds
             console.log(`Audio duration: ${duration} seconds`);
             // STEP DOWNLOAD BLOB FOR URL, Make it URL Again using new Audio(URL.createObjectURL())
-
+            setTranscriptionProcessData((prev) => ({
+              ...prev,
+              generated_speech_url: outPutAudio?.audioUrl,
+            }));
             setNewBodyItem({
               // title: fileName,
               inputFile: fileName,
@@ -382,6 +396,7 @@ function ListingScreen() {
         fileName: e?.data?.inputFile,
         duration: e?.data?.duration,
       });
+      setFile(null);
       handleOpen();
     }
   };
@@ -689,7 +704,7 @@ function ListingScreen() {
                 Transcribed Audio
               </p>
               <audio
-                src={transcriptionProcessData.generated_speech_url}
+                src={transcriptionProcessData?.generated_speech_url}
                 controls
                 style={{
                   backgroundColor: "transparent",
