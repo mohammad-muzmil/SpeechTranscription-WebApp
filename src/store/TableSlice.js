@@ -18,13 +18,30 @@ const initialState = {
       label: "Input File",
       type: "text",
       subType: "voice_wave",
-      icon_key: "input_file",
+      // icon_key: "input_file",
       onClickEmittToParent: true,
       body_styles: {
         fontSize: 25,
         color: "#669EFF",
       },
-      noText: true,
+      // <iconify-icon icon="flat-color-icons:speaker"></iconify-icon>
+      hasIcon: {
+        alignment: "right",
+        icon_name: "flat-color-icons:speaker",
+        input_file_url: "",
+        tooltip: "Click to Listen",
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 20,
+          // padding: 0,
+          // margin: 0,
+          // position: "absolute",
+
+          // borderRadius: 50,
+          color: "#0560FD",
+        },
+      },
+      noText: false,
       customHeaderStyles: {
         minWidth: "70px",
       },
@@ -47,6 +64,22 @@ const initialState = {
         minWidth: "150px",
       },
       openModel: true,
+      hasIcon: {
+        alignment: "right",
+        icon_name: "quill:link-out",
+        input_file_url: "",
+        tooltip: "Click to Listen",
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 17,
+          // padding: 0,
+          // margin: 0,
+          // position: "absolute",
+
+          // borderRadius: 50,
+          color: "#0560FD",
+        },
+      },
     },
 
     {
@@ -81,7 +114,8 @@ const initialState = {
   bodyTest: [
     {
       title: "New Recording",
-      inputFile: ".mp3",
+
+      inputFile: ".mp322",
       fileType: ".mp4",
       Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
@@ -338,6 +372,8 @@ const initialState = {
     {
       key: "download",
       label: "Download",
+      tooltip:
+        "Download Transcripted ZIP file (Input Audio, Output Audio, Transcripted Text).",
       icon: "ri:download-fill",
       color: "#0560FD",
     },

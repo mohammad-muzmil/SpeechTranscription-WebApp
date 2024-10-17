@@ -106,7 +106,8 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                       sx={{
                         ...bodyStyles,
                         borderBottom: 0,
-                        ...(column?.key === "Transcription" && {
+                        ...((column?.key === "Transcription" ||
+                          column?.onClickEmittToParent) && {
                           cursor: "pointer",
                         }),
                       }}
@@ -147,13 +148,42 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                               </p>
                             )}
                           {!column?.noText && (
-                            <p style={{ padding: 0, margin: 0 }}>
+                            <p
+                              style={{
+                                padding: 0,
+                                margin: 0,
+                              }}
+                            >
                               {" "}
                               {row[column.key]
                                 ? truncateText(row[column.key], 20)
                                 : "-"}
                             </p>
                           )}{" "}
+                          {column?.hasIcon && (
+                            <p
+                              title={column?.hasIcon?.tooltip}
+                              style={{
+                                padding: 0,
+                                margin: 0,
+                                marginLeft: 10,
+                                cursor: "pointer",
+                                display: "flex",
+                                flexDirection: "row",
+                                alignItems: "center",
+                              }}
+                            >
+                              {" "}
+                              <Icon
+                                icon={column?.hasIcon?.icon_name}
+                                style={{
+                                  marginRight: "10px",
+                                  ...(column?.hasIcon?.styles || {}),
+                                }}
+                                cursor="pointer"
+                              />
+                            </p>
+                          )}
                         </div>
                       )}
                       {/* {
@@ -238,7 +268,7 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                       {actions.map((action) => (
                         <Tooltip
                           key={action.key}
-                          title={action.label}
+                          title={action?.tooltip || action.label}
                           arrow
                           onClick={() => {
                             actionClicked(action, {

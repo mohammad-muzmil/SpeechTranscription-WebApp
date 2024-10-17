@@ -25,6 +25,9 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
 function ListingScreen() {
+  const APIURL = window?.location.hostname;
+  let protocol = window.location.protocol;
+
   const [active, setActive] = useState("upload");
   const [isRecording, setIsRecording] = useState(false);
   const [file, setFile] = useState(null);
@@ -129,6 +132,7 @@ function ListingScreen() {
     data["input_file"]["input_file_url"] = URL.createObjectURL(file);
     dispatch(addBodyItem(data));
     setOpen(false);
+    setAudioTime(null);
   };
 
   const handleDownload = async (dataInput) => {
@@ -221,7 +225,7 @@ function ListingScreen() {
 
       try {
         const response = await axios.post(
-          "http://192.168.1.81:5050/process_audio",
+          `${protocol}//${APIURL}:5050/process_audio`,
           formData,
           {
             headers: {
@@ -229,7 +233,6 @@ function ListingScreen() {
             },
           }
         );
-        setLoader(false);
 
         console.log("File uploaded successfully:", response.data);
 
@@ -244,21 +247,15 @@ function ListingScreen() {
           });
           let audio = new Audio(URL.createObjectURL(newAudioFile));
 
-          setFileMetaData({
-            fileName: fileName,
-            duration: formatTime(audioTime) || "-",
-          });
           console.log(audioTime, "audioTime");
 
           audio.onloadedmetadata = () => {
+            let duration = Math.floor(audio?.duration); // Truncate to whole seconds
+            console.log(`Audio duration: ${duration} seconds`);
             setFileMetaData({
               fileName: fileName,
-              duration: audioTime
-                ? formatTime(audioTime)
-                : audio?.duration || "-",
+              duration: formatTime(duration) || "-",
             });
-            const duration = Math.floor(audio?.duration); // Truncate to whole seconds
-            console.log(`Audio duration: ${duration} seconds`);
             // STEP DOWNLOAD BLOB FOR URL, Make it URL Again using new Audio(URL.createObjectURL())
             setTranscriptionProcessData((prev) => ({
               ...prev,
@@ -308,7 +305,7 @@ function ListingScreen() {
                     },
                   },
             });
-            setAudioTime(null);
+
             // Dispatch the action to add the new body item
 
             handleOpen("View");
@@ -319,21 +316,17 @@ function ListingScreen() {
         setLoader(false);
 
         console.error("Error uploading file:", error);
+      } finally {
+        setLoader(false);
       }
     } else {
-      alert("Please select an audio file first");
+      alert("Please select an audio file");
       setLoader(false);
     }
   };
 
-  const handleClose = (type) => {
+  const handleClose = () => {
     setOpen(!open);
-
-    console.log(type, "type");
-    // if (type === "clear") {
-    //   setFileMetaData();
-
-    // }
   };
 
   const handleInputModalClose = () => {
@@ -347,12 +340,6 @@ function ListingScreen() {
   };
   const { header, body, actions } = useSelector((state) => state.data);
   const dispatch = useDispatch();
-  const recorder = (e) => {};
-  console.log(file, "file");
-  // useEffect(() => {
-  //   // Fetch body data on component mount
-  //   dispatch(fetchBodyData('POST','/processaudio',));
-  // }, [dispatch]);
 
   const handleFileNameClick = () => {
     setIsEditing(true);
