@@ -27,7 +27,15 @@ import { saveAs } from "file-saver";
 function ListingScreen() {
   const APIURL = window?.location.hostname;
   let protocol = window.location.protocol;
+  const CryptoJS = require("crypto-js");
+  const secureKey = process.env.REACT_APP_SECURE_KEY;
 
+  const userDetails = JSON.parse(
+    CryptoJS.AES.decrypt(localStorage.getItem("user"), secureKey).toString(
+      CryptoJS.enc.Utf8
+    )
+  );
+  console.log(userDetails, "userDetails");
   const [active, setActive] = useState("upload");
   const [isRecording, setIsRecording] = useState(false);
   const [file, setFile] = useState(null);
@@ -222,10 +230,12 @@ function ListingScreen() {
     if (newAudioFile) {
       const formData = new FormData();
       formData.append("audio", newAudioFile); // 'audio' is the key for the file
-
+      formData.append("type", "input");
+      formData.append("userId", userDetails?.user_id);
       try {
         const response = await axios.post(
-          `${protocol}//${APIURL}:5050/process_audio`,
+          // `${protocol}//${APIURL}:5050/process_audio`,
+          `http://192.168.1.81:5050/process_audio`,
           formData,
           {
             headers: {
@@ -390,6 +400,20 @@ function ListingScreen() {
   return (
     <div className="container">
       <div className="top-section">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "flex-end",
+          }}
+        >
+          <Icon
+            icon="mdi:user"
+            cursor="pointer"
+            // onClick={}
+            style={{ width: "40px", height: "40px" }}
+          />
+        </div>
         <img src={logoPng} alt="Logo" className="logo" />
 
         <div className="headerContent">
