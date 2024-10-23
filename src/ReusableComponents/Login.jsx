@@ -25,12 +25,12 @@ const Login = () => {
 
       const response = await loginAPI(user);
       if (response?.stored_data?.user_id) {
-        navigate("/home");
         const encryptedData = CryptoJS.AES.encrypt(
           JSON.stringify(response?.stored_data),
           secureKey
         ).toString();
         localStorage.setItem("user", encryptedData);
+        navigate("/home");
       }
     } catch (error) {
       console.error("Error during login:", error);

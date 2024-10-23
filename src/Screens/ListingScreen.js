@@ -328,6 +328,17 @@ function ListingScreen() {
 
       console.log("File uploaded successfully:", response.data);
 
+
+      let respData = { ...response?.data }
+
+      if (respData?.generated_speech_url) {
+        respData['play'] = respData?.generated_speech_url;
+        respData['play_url'] = await getData('http://192.168.1.81:5050/temp_url?fileName=' + respData?.generated_speech_url);
+      }
+      if (respData?.input_audio_url) {
+        respData['inputFile'] = respData?.input_audio_url;
+        respData['inputFile_url'] = await getData('http://192.168.1.81:5050/temp_url?fileName=' + respData?.input_audio_url);
+      }
       if (response?.data?.generated_speech_url) {
         setTranscriptionProcessData(response?.data);
         let outPutAudio = await fetchAudioAsBlob(
@@ -372,25 +383,25 @@ function ListingScreen() {
             },
             item_type: audioFile?.recordedURL
               ? {
-                  icon_name: "ri:mic-fill",
-                  styles: {
-                    backgroundColor: "#5A97FF",
-                    fontSize: 15,
-                    padding: 3,
-                    borderRadius: 50,
-                    color: "#fff",
-                  },
-                }
-              : {
-                  icon_name: "ic:baseline-upload",
-                  styles: {
-                    backgroundColor: "#ff898b",
-                    fontSize: 15,
-                    padding: 3,
-                    borderRadius: 50,
-                    color: "#fff",
-                  },
+                icon_name: "ri:mic-fill",
+                styles: {
+                  backgroundColor: "#5A97FF",
+                  fontSize: 15,
+                  padding: 3,
+                  borderRadius: 50,
+                  color: "#fff",
                 },
+              }
+              : {
+                icon_name: "ic:baseline-upload",
+                styles: {
+                  backgroundColor: "#ff898b",
+                  fontSize: 15,
+                  padding: 3,
+                  borderRadius: 50,
+                  color: "#fff",
+                },
+              },
           });
 
           // Dispatch the action to add the new body item
@@ -405,6 +416,28 @@ function ListingScreen() {
       console.error("Error uploading file:", error);
     } finally {
       setLoader(false);
+    }
+  };
+
+
+  const postData = async (url, data) => {
+    try {
+      const response = await axios.post(url, data);
+      return response.data; // Return the data from the response
+    } catch (error) {
+      console.error('Error posting data:', error);
+      throw error; // Rethrow the error for further handling
+    }
+  };
+
+
+  const getData = async (url) => {
+    try {
+      const response = await axios.get(url);
+      return response.data; // Return the data from the response
+    } catch (error) {
+      console.error('Error posting data:', error);
+      throw error; // Rethrow the error for further handling
     }
   };
 
