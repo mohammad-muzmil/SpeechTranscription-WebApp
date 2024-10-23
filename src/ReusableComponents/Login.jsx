@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import CryptoJS from "crypto-js";
 import axios from "axios";
 import { auth, provider } from "../firebaseConfig";
@@ -14,9 +14,10 @@ import facebookIcon from './../assets/images/facebook.png'
 const Login = () => {
   const navigate = useNavigate();
   const secureKey = process.env.REACT_APP_SECURE_KEY;
-
-  const handleGoogleLogin = useCallback(async () => {
+  const provider = new GoogleAuthProvider();
+  const handleGoogleLogin = async () => {
     try {
+      provider.setCustomParameters({ prompt: 'select_account' });
       const result = await signInWithPopup(auth, provider);
       const data = result?.user;
 
@@ -35,7 +36,7 @@ const Login = () => {
     } catch (error) {
       console.error("Error during login:", error);
     }
-  }, [navigate]);
+  };
 
   const loginAPI = async (payload) => {
     try {

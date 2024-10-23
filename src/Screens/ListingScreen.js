@@ -27,7 +27,7 @@ import ModalHeader from "../ReusableComponents/ModelHeader";
 
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signOut } from "firebase/auth";
 import { auth, provider } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 
@@ -49,6 +49,7 @@ function ListingScreen() {
   const [transcriptionProcessData, setTranscriptionProcessData] = useState();
   const [newBodyItem, setNewBodyItem] = useState({});
   const [open, setOpen] = useState(false);
+  const [logoutDailog, setLogoutDailog] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [audioTime, setAudioTime] = useState(null);
@@ -136,15 +137,15 @@ function ListingScreen() {
       handleFile(files[0]);
     }
   };
-  const handleFileUploadClick = (event) => {
-    if (!userDetails) {
-      event.preventDefault();
-      setShowDialog(true);
-      console.log(userDetails, "userDetails");
-    } else {
-      if (!file) document.getElementById("fileInput").click(); // Trigger file input click
-    }
-  };
+  // const handleFileUploadClick = (event) => {
+  //   if (!userDetails) {
+  //     event.preventDefault();
+  //     setShowDialog(true);
+  //     console.log(userDetails, "userDetails");
+  //   } else {
+  //     if (!file) document.getElementById("fileInput").click(); // Trigger file input click
+  //   }
+  // };
   const handleFileInputChange = (event) => {
     const files = event.target.files;
     if (files.length > 0) {
@@ -290,9 +291,23 @@ function ListingScreen() {
   const handleOptions = () => {
     setOpenDialog(true);
   };
-  const handleLogout = () => {
-    localStorage.clear();
+  const handleClosePopover = () => {
     setOpenDialog(false);
+  };
+  const handleConfirmlogout = ()=>{
+    handleLogout()
+    setLogoutDailog(false)
+  }
+  const handleCancellogout = () =>{
+    setLogoutDailog(false)
+  }
+  const handleOpenlogout = () =>{
+    setLogoutDailog(true)
+  }
+  const handleLogout = async() => {
+    await signOut(auth);
+    localStorage.clear();
+    navigate("/")
   };
   const processAudioUpload = async (audioFile) => {
     let newAudioFile = audioFile?.recordedURL
@@ -507,15 +522,11 @@ function ListingScreen() {
   return (
     <div className="container">
       <div className="top-section">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "flex-end",
-          }}
-        >
-          <>
-            <Avatar
+        
+        <div className="flex-properties-corner">
+        <img src={logoPng} alt="Logo" className="logo" />
+
+        <Avatar
               src={userDetails?.photoURL}
               alt={userDetails?.displayName || "User Avatar"}
               onClick={() => handleOptions()}
@@ -526,10 +537,71 @@ function ListingScreen() {
                 marginTop: "10px",
               }}
             />
-          </>
-        </div>
-        <img src={logoPng} alt="Logo" className="logo" />
+  <Popover
+  open={openDialog}
+  anchorOrigin={{
+    vertical: 'top',
+    horizontal: 'right',
+  }}
+  transformOrigin={{
+    vertical: 'top',
+    horizontal: 'bottom',
+  }}
+  onClose={handleClosePopover}
+>
+  {/* Cancel Icon */}
+  {/* <div
+    style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}
+  >
+    <Icon
+      size="small"
+      sx={{
+        color: "black",
+      }}
+      cursor="pointer"
+      width={25}
+      height={25}
+      icon="material-symbols:cancel"
+      onClick={() => {
+        setOpenDialog(false);
+      }}
+    />
+  </div> */}
 
+  {/* Content Section */}
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center", // Center content vertically
+      textAlign: "center", // Center text
+      padding: "16px", // Add padding for better spacing
+    }}
+  >
+    <Avatar
+      src={userDetails?.photoURL}
+      alt={userDetails?.displayName || "User Avatar"}
+      sx={{ width: 60, height: 60}}
+    />
+    <Typography variant="body1" sx={{ marginTop: 2 }}>
+      {userDetails?.email}
+    </Typography>
+
+    {/* Logout Button */}
+    <Button
+      // size="small"
+      variant="contained"
+      color="error"
+      onClick={handleOpenlogout}
+      sx={{ marginTop: 2 ,textTransform:"none"}} // Space above the button
+    >
+      Logout
+    </Button>
+  </div>
+</Popover>
+        </div>
+   
         <div className="headerContent">
           <p className="headerTitle">
             Speech Transcription and Real-Time Processing
@@ -622,7 +694,7 @@ function ListingScreen() {
                       <label
                         className="browseButtonStyle"
                         htmlFor="fileInput"
-                        onClick={handleFileUploadClick}
+                        // onClick={handleFileUploadClick}
                         style={{ cursor: "pointer" }}
                       >
                         Browse
@@ -872,7 +944,8 @@ function ListingScreen() {
           )}
         </DialogActions>
       </Dialog>
-      <Dialog
+
+      {/* <Dialog
         PaperProps={{
           sx: { maxWidth: 720, borderRadius: "15px" },
         }}
@@ -884,9 +957,6 @@ function ListingScreen() {
           <Typography variant="body1">
             Hi there! You need to log in before proceeding.
           </Typography>
-          {/* <Typography variant="body2" color="textSecondary">
-            You will be redirected to the login screen.
-          </Typography> */}
         </DialogContent>
         <dailogActions>
           <div
@@ -908,7 +978,8 @@ function ListingScreen() {
             </Button>
           </div>
         </dailogActions>
-      </Dialog>
+      </Dialog> */}
+      
       <Modal
         open={inputPlayerModal}
         onClose={handleInputModalClose}
@@ -968,68 +1039,28 @@ function ListingScreen() {
           </div>
         </div>
       </Modal>
-      <Popover
-        open={openDialog}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-        sx={{
-          width: "200px",
-          height: "200px",
-          borderRadius: "4%",
-          padding: 2, // Optional: add some padding
-        }}
-      >
-        {/* Cancel Icon */}
-        <div
-          style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}
-        >
-          <Icon
-            size="small"
-            sx={{
-              color: "black",
-              cursor: "pointer",
-            }}
-            width={25}
-            height={25}
-            icon="material-symbols:cancel"
-            onClick={() => {
-              setOpenDialog(false);
-            }}
-          />
-        </div>
-
-        {/* Content Section */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            flexGrow: 1,
-            justifyContent: "center", // Center content vertically
-          }}
-        >
-          <Avatar
-            src={userDetails?.photoURL}
-            alt={userDetails?.displayName || "User Avatar"}
-            sx={{ width: 60, height: 60 }}
-          />
-          <Typography variant="body1" sx={{ marginTop: 2 }}>
-            {userDetails?.email}
-          </Typography>
-        </div>
-
-        {/* Logout Button */}
-        <Button
-          size="small"
-          variant="contained"
-          onClick={handleLogout}
-          sx={{ backgroundColor: "#a8323a", marginTop: 2 }} // Space above the button
-        >
-          Logout
+    
+<Dialog
+      fullWidth
+      maxWidth={false}
+      open={logoutDailog}
+      PaperProps={{
+        sx: { maxWidth: 420, borderRadius: '15px' },
+      }}
+    >
+      <DialogTitle>Confirm Logout</DialogTitle>
+      <DialogContent>
+        Are you sure you want to log out?
+      </DialogContent>
+      <DialogActions>
+        <Button size="small" onClick={handleCancellogout} color="primary" variant="contained">
+          No
         </Button>
-      </Popover>
+        <Button size="small" onClick={handleConfirmlogout} color="error" variant="contained">
+          Yes
+        </Button>
+      </DialogActions>
+    </Dialog>
     </div>
   );
 }

@@ -30,7 +30,7 @@
 }
 
 .logo {
-    width: 150px;
+    height: 50px;
 }
 
 .headerTitle {
@@ -312,4 +312,10 @@
         align-items: center;
     } */
 
+}
+
+.flex-properties-corner{
+    display: flex;
+    /* flex-direction: row; */
+    justify-content: space-between;
 }

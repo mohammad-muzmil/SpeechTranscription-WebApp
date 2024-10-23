@@ -102,9 +102,28 @@ const initialState = {
     },
     {
       key: "play",
-      label: "Play",
-      type: "audio",
-      subType: "",
+      label: "Output Audio",
+      type: "text",
+      subType: "voice_wave",
+      onClickEmittToParent: true,
+      noText: false,
+      hasIcon: {
+        alignment: "right",
+        icon_name: "flat-color-icons:speaker",
+        input_file_url: "",
+        tooltip: "Click to Listen",
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 20,
+          // padding: 0,
+          // margin: 0,
+          // position: "absolute",
+
+          // borderRadius: 50,
+          color: "#0560FD",
+        },
+      },
+      noText: false,
       customHeaderStyles: {
         minWidth: "150px",
       },
