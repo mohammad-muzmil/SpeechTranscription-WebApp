@@ -11,7 +11,6 @@ import {
   DialogContent,
   DialogTitle,
   Modal,
-  Typography,
 } from "@mui/material";
 import AudioRecorder from "../ReusableComponents/AudioRecorder";
 import {
@@ -370,25 +369,25 @@ function ListingScreen() {
             },
             item_type: audioFile?.recordedURL
               ? {
-                  icon_name: "ri:mic-fill",
-                  styles: {
-                    backgroundColor: "#5A97FF",
-                    fontSize: 15,
-                    padding: 3,
-                    borderRadius: 50,
-                    color: "#fff",
-                  },
-                }
-              : {
-                  icon_name: "ic:baseline-upload",
-                  styles: {
-                    backgroundColor: "#ff898b",
-                    fontSize: 15,
-                    padding: 3,
-                    borderRadius: 50,
-                    color: "#fff",
-                  },
+                icon_name: "ri:mic-fill",
+                styles: {
+                  backgroundColor: "#5A97FF",
+                  fontSize: 15,
+                  padding: 3,
+                  borderRadius: 50,
+                  color: "#fff",
                 },
+              }
+              : {
+                icon_name: "ic:baseline-upload",
+                styles: {
+                  backgroundColor: "#ff898b",
+                  fontSize: 15,
+                  padding: 3,
+                  borderRadius: 50,
+                  color: "#fff",
+                },
+              },
           });
 
           // Dispatch the action to add the new body item
@@ -405,7 +404,31 @@ function ListingScreen() {
       setLoader(false);
     }
   };
+  async function fetchAudioAsBlob(url) {
+    try {
+      // Fetch the audio file from the URL
+      const response = await fetch(url);
 
+      // Check if the response is okay
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      // Convert the response to a Blob
+      const audioBlob = await response.blob();
+
+      // Create a URL for the Blob
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      // You can return the audio URL or the Blob, depending on your needs
+      return {
+        audioBlob,
+        audioUrl,
+      };
+    } catch (error) {
+      console.error("Error fetching audio:", error);
+    }
+  }
   const handleSubmit = async (audioFile) => {
     // event.preventDefault();
 
@@ -446,7 +469,6 @@ function ListingScreen() {
   const handleClose = () => {
     setOpen(!open);
   };
-
   const handleInputModalClose = () => {
     setInputPlayerModal(false);
   };
@@ -795,8 +817,8 @@ function ListingScreen() {
                     Duration:{" "}
                     {audioTime ? formatTime(audioTime) : fileMetData?.duration}
                   </span>
-                </div>
-              </div>
+                </div >
+              </div >
               <div
                 className="flexProperties"
                 style={{ justifyContent: "space-between", marginTop: "25px" }}
@@ -843,37 +865,40 @@ function ListingScreen() {
                 onPlay={handleAudioPlay}
               />
             </>
-          )}
-        </DialogContent>
+          )
+          }
+        </DialogContent >
         <DialogActions>
-          {dailogActions ? (
-            <>
+          {
+            dailogActions ? (
+              <>
+                <Button
+                  variant="contained"
+                  sx={{ backgroundColor: "#303030" }}
+                  onClick={() => {
+                    handleClose("clear");
+                  }}
+                >
+                  Discard
+                </Button>
+                <Button variant="contained" onClick={() => StoreData()}>
+                  Save
+                </Button>
+              </>
+            ) : (
               <Button
                 variant="contained"
                 sx={{ backgroundColor: "#303030" }}
                 onClick={() => {
-                  handleClose("clear");
+                  handleClose();
                 }}
               >
-                Discard
+                Close
               </Button>
-              <Button variant="contained" onClick={() => StoreData()}>
-                Save
-              </Button>
-            </>
-          ) : (
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: "#303030" }}
-              onClick={() => {
-                handleClose();
-              }}
-            >
-              Close
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
+            )
+          }
+        </DialogActions >
+      </Dialog >
       <Dialog
         PaperProps={{
           sx: { maxWidth: 720, borderRadius: "15px" },
@@ -1002,7 +1027,7 @@ function ListingScreen() {
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </div >
   );
 }
 

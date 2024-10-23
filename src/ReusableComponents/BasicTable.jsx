@@ -90,10 +90,10 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                 {metaData.requiredSerialNumber && (
                   <TableCell align="left" style={bodyStyles}>
                     {metaData?.paginatedSerialNumber &&
-                    metaData?.paginationMetaData
+                      metaData?.paginationMetaData
                       ? (metaData.paginationMetaData.page - 1) *
-                          metaData.paginationMetaData.count +
-                        (index + 1)
+                      metaData.paginationMetaData.count +
+                      (index + 1)
                       : index + 1}
                   </TableCell>
                 )}{" "}
@@ -114,17 +114,17 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                       onClick={() =>
                         actionEmitter && column?.onClickEmittToParent
                           ? actionEmitter({
-                              action: { type: "rowClick" },
-                              header: column,
-                              data: row,
-                            })
+                            action: { type: "rowClick" },
+                            header: column,
+                            data: row,
+                          })
                           : column?.openModel
-                          ? actionEmitter({
+                            ? actionEmitter({
                               action: { type: "openModel" },
                               header: column,
                               data: row,
                             })
-                          : {}
+                            : {}
                       }
                     >
                       {column?.type === "text" && (
@@ -300,8 +300,8 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                 align="center"
                 colSpan={
                   header?.length +
-                    (actions.length > 0 ? 1 : 0) +
-                    (metaData.requiredSerialNumber ? 1 : 0) || 1
+                  (actions.length > 0 ? 1 : 0) +
+                  (metaData.requiredSerialNumber ? 1 : 0) || 1
                 }
               >
                 {" "}
