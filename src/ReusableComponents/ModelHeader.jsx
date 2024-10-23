@@ -19,7 +19,7 @@ const ModalHeader = ({ heading, handleClose, handleDownload }) => {
             color: "#FFFFFF",
             width: "100%",
             textAlign: "center",
-            fontWeight: 600
+            fontWeight: 600,
           }}
         >
           {heading}
@@ -56,12 +56,14 @@ const ModalHeader = ({ heading, handleClose, handleDownload }) => {
               alignItems: "flex-end",
               justifyContent: "flex-end",
               marginRight: "12px",
-              cursor: 'pointer',
-              color: 'white',
-              width: '20px',
-              height: '20px'
+              cursor: "pointer",
+              color: "white",
+              width: "20px",
+              height: "20px",
             }}
-            onClick={() => { handleClose() }}
+            onClick={() => {
+              handleClose();
+            }}
           />
         )}
       </Box>
