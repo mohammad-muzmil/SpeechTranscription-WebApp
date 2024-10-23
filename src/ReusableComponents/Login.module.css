@@ -19,7 +19,7 @@
 .righChildParent {}
 
 .rightChild {
-    background-image: url('./../assets/images/loginChild.png');
+    background-image: url('./../assets/images/loginChild.jpg');
     /* Update with the actual image URL */
     background-size: cover;
     background-position: center;
