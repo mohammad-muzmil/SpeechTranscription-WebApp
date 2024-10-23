@@ -1,33 +1,50 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
 const initialState = {
   header: [
-    {
-      key: "title",
-      label: "Title",
-      type: "text",
-      subType: "",
-      icon_key: "item_type",
-      customHeaderStyles: {
-        minWidth: "100px"
-      }
-    },
+    // {
+    //   key: "title",
+    //   label: "Title",
+    //   type: "text",
+    //   subType: "",
+    //   icon_key: "item_type",
+    //   customHeaderStyles: {
+    //     minWidth: "100px"
+    //   }
+    // },
     {
       key: "inputFile",
       label: "Input File",
       type: "text",
       subType: "voice_wave",
-      icon_key: "input_file",
+      // icon_key: "input_file",
       onClickEmittToParent: true,
       body_styles: {
         fontSize: 25,
-        color: '#669EFF'
+        color: "#669EFF",
       },
-      noText: true,
+      // <iconify-icon icon="flat-color-icons:speaker"></iconify-icon>
+      hasIcon: {
+        alignment: "right",
+        icon_name: "flat-color-icons:speaker",
+        input_file_url: "",
+        tooltip: "Click to Listen",
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 20,
+          // padding: 0,
+          // margin: 0,
+          // position: "absolute",
+
+          // borderRadius: 50,
+          color: "#0560FD",
+        },
+      },
+      noText: false,
       customHeaderStyles: {
-        minWidth: "70px"
-      }
+        minWidth: "70px",
+      },
     },
     {
       key: "fileType",
@@ -35,8 +52,8 @@ const initialState = {
       type: "text",
       subType: "",
       customHeaderStyles: {
-        minWidth: "70px"
-      }
+        minWidth: "70px",
+      },
     },
     {
       key: "Transcription",
@@ -44,8 +61,25 @@ const initialState = {
       type: "text",
       subType: "",
       customHeaderStyles: {
-        minWidth: "150px"
-      }
+        minWidth: "150px",
+      },
+      openModel: true,
+      hasIcon: {
+        alignment: "right",
+        icon_name: "quill:link-out",
+        input_file_url: "",
+        tooltip: "Click to Listen",
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 17,
+          // padding: 0,
+          // margin: 0,
+          // position: "absolute",
+
+          // borderRadius: 50,
+          color: "#0560FD",
+        },
+      },
     },
 
     {
@@ -54,17 +88,17 @@ const initialState = {
       type: "text",
       subType: "",
       customHeaderStyles: {
-        minWidth: "70px"
-      }
+        minWidth: "70px",
+      },
     },
     {
       key: "dateAndtime",
-      label: "Date & Time",
+      label: "Input Date & Time",
       type: "dateAndtime",
       subType: "",
       customHeaderStyles: {
-        minWidth: "100px"
-      }
+        minWidth: "100px",
+      },
     },
     {
       key: "play",
@@ -72,44 +106,45 @@ const initialState = {
       type: "audio",
       subType: "",
       customHeaderStyles: {
-        minWidth: "150px"
-      }
+        minWidth: "150px",
+      },
     },
   ],
   body: [],
   bodyTest: [
     {
       title: "New Recording",
-      inputFile: ".mp3",
+
+      inputFile: ".mp322",
       fileType: ".mp4",
       Transcription: "Hi! its a new audio recording...",
       duration: "00:10",
       "date&time": "23/09/2024  17:40",
       audio: {
         url: "https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
-        type: ".mp3"
+        type: ".mp3",
       },
       input_file: {
         icon_name: "bi:soundwave",
-        input_file_url: '',
+        input_file_url: "",
         styles: {
           // backgroundColor: "#5A97FF",
           fontSize: 30,
           // padding: 3,
           // borderRadius: 50,
-          color: "c3d9ff"
-        }
-
-      }, item_type: {
+          color: "c3d9ff",
+        },
+      },
+      item_type: {
         icon_name: "ri:mic-fill",
         styles: {
           backgroundColor: "#5A97FF",
           fontSize: 30,
           padding: 3,
           borderRadius: 50,
-          color: "#fff"
-        }
-      }
+          color: "#fff",
+        },
+      },
     },
     {
       title: "Sample Audio",
@@ -121,26 +156,27 @@ const initialState = {
       play: "",
       input_file: {
         icon_name: "bi:soundwave",
-        input_file_url: '',
+        input_file_url: "",
         styles: {
           // backgroundColor: "#5A97FF",
           fontSize: 30,
           // padding: 3,
           // borderRadius: 50,
-          color: "c3d9ff"
-        }
-
-      }, item_type: {
+          color: "c3d9ff",
+        },
+      },
+      item_type: {
         icon_name: "ic:baseline-upload",
         styles: {
           backgroundColor: "#ff898b",
           fontSize: 10,
           padding: 3,
           borderRadius: 50,
-          color: "#fff"
-        }
-      }
-    }, {
+          color: "#fff",
+        },
+      },
+    },
+    {
       title: "New Recording",
       inputFile: ".mp3",
       fileType: ".mp4",
@@ -150,37 +186,36 @@ const initialState = {
       play: "",
       input_file: {
         icon_name: "bi:soundwave",
-        input_file_url: '',
+        input_file_url: "",
         styles: {
           // backgroundColor: "#5A97FF",
           fontSize: 30,
           // padding: 3,
           // borderRadius: 50,
-          color: "c3d9ff"
-        }
-
-      }, item_type: {
+          color: "c3d9ff",
+        },
+      },
+      item_type: {
         icon_name: "ri:mic-fill",
         styles: {
           backgroundColor: "#5A97FF",
           fontSize: 10,
           padding: 3,
           borderRadius: 50,
-          color: "#fff"
-        }
+          color: "#fff",
+        },
       },
       input_file: {
         icon_name: "bi:soundwave",
-        input_file_url: '',
+        input_file_url: "",
         styles: {
           // backgroundColor: "#5A97FF",
           fontSize: 30,
           // padding: 3,
           // borderRadius: 50,
-          color: "c3d9ff"
-        }
-
-      }
+          color: "c3d9ff",
+        },
+      },
     },
     {
       title: "Sample Audio",
@@ -192,26 +227,27 @@ const initialState = {
       play: "",
       input_file: {
         icon_name: "bi:soundwave",
-        input_file_url: '',
+        input_file_url: "",
         styles: {
           // backgroundColor: "#5A97FF",
           fontSize: 30,
           // padding: 3,
           // borderRadius: 50,
-          color: "c3d9ff"
-        }
-
-      }, item_type: {
+          color: "c3d9ff",
+        },
+      },
+      item_type: {
         icon_name: "ic:baseline-upload",
         styles: {
           backgroundColor: "#ff898b",
           fontSize: 10,
           padding: 3,
           borderRadius: 50,
-          color: "#fff"
-        }
-      }
-    }, {
+          color: "#fff",
+        },
+      },
+    },
+    {
       title: "New Recording",
       inputFile: ".mp3",
       fileType: ".mp4",
@@ -221,25 +257,25 @@ const initialState = {
       play: "",
       input_file: {
         icon_name: "bi:soundwave",
-        input_file_url: '',
+        input_file_url: "",
         styles: {
           // backgroundColor: "#5A97FF",
           fontSize: 30,
           // padding: 3,
           // borderRadius: 50,
-          color: "c3d9ff"
-        }
-
-      }, item_type: {
+          color: "c3d9ff",
+        },
+      },
+      item_type: {
         icon_name: "ri:mic-fill",
         styles: {
           backgroundColor: "#5A97FF",
           fontSize: 10,
           padding: 3,
           borderRadius: 50,
-          color: "#fff"
-        }
-      }
+          color: "#fff",
+        },
+      },
     },
     {
       title: "Sample Audio",
@@ -251,26 +287,27 @@ const initialState = {
       play: "",
       input_file: {
         icon_name: "bi:soundwave",
-        input_file_url: '',
+        input_file_url: "",
         styles: {
           // backgroundColor: "#5A97FF",
           fontSize: 30,
           // padding: 3,
           // borderRadius: 50,
-          color: "c3d9ff"
-        }
-
-      }, item_type: {
+          color: "c3d9ff",
+        },
+      },
+      item_type: {
         icon_name: "ic:baseline-upload",
         styles: {
           backgroundColor: "#ff898b",
           fontSize: 10,
           padding: 3,
           borderRadius: 50,
-          color: "#fff"
-        }
-      }
-    }, {
+          color: "#fff",
+        },
+      },
+    },
+    {
       title: "New Recording",
       inputFile: ".mp3",
       fileType: ".mp4",
@@ -280,25 +317,25 @@ const initialState = {
       play: "",
       input_file: {
         icon_name: "bi:soundwave",
-        input_file_url: '',
+        input_file_url: "",
         styles: {
           // backgroundColor: "#5A97FF",
           fontSize: 30,
           // padding: 3,
           // borderRadius: 50,
-          color: "c3d9ff"
-        }
-
-      }, item_type: {
+          color: "c3d9ff",
+        },
+      },
+      item_type: {
         icon_name: "ri:mic-fill",
         styles: {
           backgroundColor: "#5A97FF",
           fontSize: 10,
           padding: 3,
           borderRadius: 50,
-          color: "#fff"
-        }
-      }
+          color: "#fff",
+        },
+      },
     },
     {
       title: "Sample Audio",
@@ -310,31 +347,33 @@ const initialState = {
       play: "",
       input_file: {
         icon_name: "bi:soundwave",
-        input_file_url: '',
+        input_file_url: "",
         styles: {
           // backgroundColor: "#5A97FF",
           fontSize: 30,
           // padding: 3,
           // borderRadius: 50,
-          color: "c3d9ff"
-        }
-
-      }, item_type: {
+          color: "c3d9ff",
+        },
+      },
+      item_type: {
         icon_name: "ic:baseline-upload",
         styles: {
           backgroundColor: "#ff898b",
           fontSize: 10,
           padding: 3,
           borderRadius: 50,
-          color: "#fff"
-        }
-      }
+          color: "#fff",
+        },
+      },
     },
   ],
   actions: [
     {
       key: "download",
       label: "Download",
+      tooltip:
+        "Download Transcripted ZIP file (Input Audio, Output Audio, Transcripted Text).",
       icon: "ri:download-fill",
       color: "#0560FD",
     },
@@ -346,9 +385,8 @@ const initialState = {
     },
   ],
 };
-
 const TableSlice = createSlice({
-  name: 'data',
+  name: "data",
   initialState,
   reducers: {
     updateBody: (state, action) => {
@@ -359,18 +397,21 @@ const TableSlice = createSlice({
     },
     // Add more reducers as needed
     removeBodyItem: (state, action) => {
-      if (window.confirm(`Are you sure you want to delete ${action.payload?.title} record?`)) {
+      if (
+        window.confirm(
+          `Are you sure you want to delete ${action.payload?.title} record?`
+        )
+      ) {
         state.body.splice(action.payload.internalIndex, 1); // The second parameter specifies the number of elements to remove
         // alert(`Element deleted. Updated array: ${array}`);
       } else {
-        alert('Deletion canceled.');
+        alert("Deletion canceled.");
       }
 
       // console.log(action, state.body)
       // state.body.push(action.payload);
     },
   },
-
 });
 
 export const { updateBody, addBodyItem, removeBodyItem } = TableSlice.actions;
