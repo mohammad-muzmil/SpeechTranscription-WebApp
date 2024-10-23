@@ -514,16 +514,7 @@ function ListingScreen() {
             alignItems: "flex-end",
           }}
         >
-          {/* <Icon
-            icon="mdi:user"
-            cursor="pointer"
-            onClick={() => handleOptions()}
-            style={{ width: "40p
-            x", height: "40px" }}
-          /> */}
-          {/* {userDetails && ( */}
           <>
-            {/* {userDetails?.displayName} */}
             <Avatar
               src={userDetails?.photoURL}
               alt={userDetails?.displayName || "User Avatar"}
@@ -536,7 +527,6 @@ function ListingScreen() {
               }}
             />
           </>
-          {/* )} */}
         </div>
         <img src={logoPng} alt="Logo" className="logo" />
 
