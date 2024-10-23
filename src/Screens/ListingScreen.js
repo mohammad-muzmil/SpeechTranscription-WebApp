@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogTitle,
   Modal,
+  Typography,
 } from "@mui/material";
 import AudioRecorder from "../ReusableComponents/AudioRecorder";
 import {
