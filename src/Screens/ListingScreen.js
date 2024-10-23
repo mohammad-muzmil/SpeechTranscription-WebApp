@@ -5,12 +5,14 @@ import BasicTable from "../ReusableComponents/BasicTable";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  Avatar,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Modal,
+  Popover,
   Typography,
 } from "@mui/material";
 import AudioRecorder from "../ReusableComponents/AudioRecorder";
@@ -370,25 +372,25 @@ function ListingScreen() {
             },
             item_type: audioFile?.recordedURL
               ? {
-                icon_name: "ri:mic-fill",
-                styles: {
-                  backgroundColor: "#5A97FF",
-                  fontSize: 15,
-                  padding: 3,
-                  borderRadius: 50,
-                  color: "#fff",
-                },
-              }
+                  icon_name: "ri:mic-fill",
+                  styles: {
+                    backgroundColor: "#5A97FF",
+                    fontSize: 15,
+                    padding: 3,
+                    borderRadius: 50,
+                    color: "#fff",
+                  },
+                }
               : {
-                icon_name: "ic:baseline-upload",
-                styles: {
-                  backgroundColor: "#ff898b",
-                  fontSize: 15,
-                  padding: 3,
-                  borderRadius: 50,
-                  color: "#fff",
+                  icon_name: "ic:baseline-upload",
+                  styles: {
+                    backgroundColor: "#ff898b",
+                    fontSize: 15,
+                    padding: 3,
+                    borderRadius: 50,
+                    color: "#fff",
+                  },
                 },
-              },
           });
 
           // Dispatch the action to add the new body item
@@ -405,31 +407,7 @@ function ListingScreen() {
       setLoader(false);
     }
   };
-  async function fetchAudioAsBlob(url) {
-    try {
-      // Fetch the audio file from the URL
-      const response = await fetch(url);
 
-      // Check if the response is okay
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      // Convert the response to a Blob
-      const audioBlob = await response.blob();
-
-      // Create a URL for the Blob
-      const audioUrl = URL.createObjectURL(audioBlob);
-
-      // You can return the audio URL or the Blob, depending on your needs
-      return {
-        audioBlob,
-        audioUrl,
-      };
-    } catch (error) {
-      console.error("Error fetching audio:", error);
-    }
-  }
   const handleSubmit = async (audioFile) => {
     // event.preventDefault();
 
@@ -470,6 +448,7 @@ function ListingScreen() {
   const handleClose = () => {
     setOpen(!open);
   };
+
   const handleInputModalClose = () => {
     setInputPlayerModal(false);
   };
@@ -542,16 +521,22 @@ function ListingScreen() {
             style={{ width: "40p
             x", height: "40px" }}
           /> */}
-          {userDetails && (
-            <>
-              {userDetails?.displayName}
-              <img
-                src={userDetails?.photoURL}
-                onClick={() => handleOptions()}
-                alt="Logo"
-              />
-            </>
-          )}
+          {/* {userDetails && ( */}
+          <>
+            {/* {userDetails?.displayName} */}
+            <Avatar
+              src={userDetails?.photoURL}
+              alt={userDetails?.displayName || "User Avatar"}
+              onClick={() => handleOptions()}
+              sx={{
+                width: 50,
+                height: 50,
+                cursor: "pointer",
+                marginTop: "10px",
+              }}
+            />
+          </>
+          {/* )} */}
         </div>
         <img src={logoPng} alt="Logo" className="logo" />
 
@@ -818,8 +803,8 @@ function ListingScreen() {
                     Duration:{" "}
                     {audioTime ? formatTime(audioTime) : fileMetData?.duration}
                   </span>
-                </div >
-              </div >
+                </div>
+              </div>
               <div
                 className="flexProperties"
                 style={{ justifyContent: "space-between", marginTop: "25px" }}
@@ -866,40 +851,37 @@ function ListingScreen() {
                 onPlay={handleAudioPlay}
               />
             </>
-          )
-          }
-        </DialogContent >
+          )}
+        </DialogContent>
         <DialogActions>
-          {
-            dailogActions ? (
-              <>
-                <Button
-                  variant="contained"
-                  sx={{ backgroundColor: "#303030" }}
-                  onClick={() => {
-                    handleClose("clear");
-                  }}
-                >
-                  Discard
-                </Button>
-                <Button variant="contained" onClick={() => StoreData()}>
-                  Save
-                </Button>
-              </>
-            ) : (
+          {dailogActions ? (
+            <>
               <Button
                 variant="contained"
                 sx={{ backgroundColor: "#303030" }}
                 onClick={() => {
-                  handleClose();
+                  handleClose("clear");
                 }}
               >
-                Close
+                Discard
               </Button>
-            )
-          }
-        </DialogActions >
-      </Dialog >
+              <Button variant="contained" onClick={() => StoreData()}>
+                Save
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="contained"
+              sx={{ backgroundColor: "#303030" }}
+              onClick={() => {
+                handleClose();
+              }}
+            >
+              Close
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
       <Dialog
         PaperProps={{
           sx: { maxWidth: 720, borderRadius: "15px" },
@@ -996,40 +978,71 @@ function ListingScreen() {
           </div>
         </div>
       </Modal>
-      <Dialog
-        fullWidth
-        maxWidth={false}
+      <Popover
         open={openDialog}
-        PaperProps={{
-          sx: { maxWidth: 420, borderRadius: "15px", height: 120 },
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+        sx={{
+          width: "200px",
+          height: "200px",
+          borderRadius: "4%",
+          padding: 2, // Optional: add some padding
         }}
       >
-        <DialogContent>
-          <Typography>Are you sure you want to logout</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button
+        {/* Cancel Icon */}
+        <div
+          style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}
+        >
+          <Icon
             size="small"
-            variant="outlined"
-            sx={{ color: "black" }}
+            sx={{
+              color: "black",
+              cursor: "pointer",
+            }}
+            width={25}
+            height={25}
+            icon="material-symbols:cancel"
             onClick={() => {
               setOpenDialog(false);
             }}
-          >
-            Cancel
-          </Button>
-          <Button
-            size="small"
-            variant="contained"
-            onClick={() => handleLogout()}
-            sx={{ backgroundColor: "#a8323a" }}
-          >
-            Logout
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div >
+          />
+        </div>
+
+        {/* Content Section */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            flexGrow: 1,
+            justifyContent: "center", // Center content vertically
+          }}
+        >
+          <Avatar
+            src={userDetails?.photoURL}
+            alt={userDetails?.displayName || "User Avatar"}
+            sx={{ width: 60, height: 60 }}
+          />
+          <Typography variant="body1" sx={{ marginTop: 2 }}>
+            {userDetails?.email}
+          </Typography>
+        </div>
+
+        {/* Logout Button */}
+        <Button
+          size="small"
+          variant="contained"
+          onClick={handleLogout}
+          sx={{ backgroundColor: "#a8323a", marginTop: 2 }} // Space above the button
+        >
+          Logout
+        </Button>
+      </Popover>
+    </div>
   );
 }
-
+{
+}
 export default ListingScreen;
