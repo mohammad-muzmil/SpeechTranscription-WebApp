@@ -24,10 +24,10 @@ const Login = () => {
       console.log(user, "user");
 
       const response = await loginAPI(user);
-      if (response?.data?.stored_data?.user_id) {
-        navigate("/Home");
+      if (response?.stored_data?.user_id) {
+        navigate("/home");
         const encryptedData = CryptoJS.AES.encrypt(
-          JSON.stringify(response?.data?.stored_data),
+          JSON.stringify(response?.stored_data),
           secureKey
         ).toString();
         localStorage.setItem("user", encryptedData);
