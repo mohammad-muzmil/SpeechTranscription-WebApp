@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./ListingScreen.css"; // Import the CSS file for styling
 import logoPng from "./../assets/images/logo.png";
 import BasicTable from "../ReusableComponents/BasicTable";
@@ -9,7 +9,9 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogTitle,
   Modal,
+  Typography,
 } from "@mui/material";
 import AudioRecorder from "../ReusableComponents/AudioRecorder";
 import {
@@ -23,21 +25,20 @@ import ModalHeader from "../ReusableComponents/ModelHeader";
 
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import { signInWithPopup } from "firebase/auth";
+import { auth, provider } from "../firebaseConfig";
+import { useNavigate } from "react-router-dom";
 
 function ListingScreen() {
   const APIURL = window?.location.hostname;
   let protocol = window.location.protocol;
   const CryptoJS = require("crypto-js");
+  const navigate = useNavigate();
   const secureKey = process.env.REACT_APP_SECURE_KEY;
 
-  const userDetails = JSON.parse(
-    CryptoJS.AES.decrypt(localStorage.getItem("user"), secureKey).toString(
-      CryptoJS.enc.Utf8
-    )
-  );
-  console.log(userDetails, "userDetails");
   const [active, setActive] = useState("upload");
   const [isRecording, setIsRecording] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
   const [file, setFile] = useState(null);
   const [fileMetData, setFileMetaData] = useState({});
   const [loader, setLoader] = useState(false);
@@ -46,12 +47,14 @@ function ListingScreen() {
   const [transcriptionProcessData, setTranscriptionProcessData] = useState();
   const [newBodyItem, setNewBodyItem] = useState({});
   const [open, setOpen] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [audioTime, setAudioTime] = useState(null);
   const [dailogActions, setDailogActions] = useState(true);
   const handleToggle = (option) => {
     setActive(option);
   };
+
   const currentAudioRef = useRef(null);
   const handleAudioPlay = (event) => {
     // If there's already an audio playing, pause it
@@ -70,7 +73,30 @@ function ListingScreen() {
   const getRecordTime = (time) => {
     setAudioTime(time);
   };
-  console.log(dailogActions, "dailogActions");
+  const getUserDetails = () => {
+    const userEncrypted = localStorage.getItem("user");
+
+    if (userEncrypted) {
+      try {
+        const decryptedData = CryptoJS.AES.decrypt(
+          userEncrypted,
+          secureKey
+        ).toString(CryptoJS.enc.Utf8);
+        if (!decryptedData) {
+          console.error("Decrypted data is empty.");
+          return null;
+        }
+        const userDetails = JSON.parse(decryptedData);
+        return userDetails;
+      } catch (error) {
+        console.error("Error during decryption or parsing:", error);
+        return null;
+      }
+    } else {
+      return null; // Return null if no user data exists
+    }
+  };
+  const userDetails = getUserDetails();
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -87,12 +113,15 @@ function ListingScreen() {
     document.getElementById("fileInput").value = "";
 
     if (file.size <= 50 * 1024 * 1024) {
-      setLoader(true);
+      // setLoader(true);
 
       // Check for file size limit (200MB)
+      // if (!userDetails) {
+      //   setShowDialog(true);
+      // } else {
+      // }
       handleSubmit(file);
       setFile(file);
-      console.log("File uploaded:", file.name);
     } else {
       alert("File size exceeds the limit of 50MB");
     }
@@ -105,7 +134,15 @@ function ListingScreen() {
       handleFile(files[0]);
     }
   };
-
+  const handleFileUploadClick = (event) => {
+    if (!userDetails) {
+      event.preventDefault();
+      setShowDialog(true);
+      console.log(userDetails, "userDetails");
+    } else {
+      if (!file) document.getElementById("fileInput").click(); // Trigger file input click
+    }
+  };
   const handleFileInputChange = (event) => {
     const files = event.target.files;
     if (files.length > 0) {
@@ -207,12 +244,55 @@ function ListingScreen() {
       console.error("Error fetching audio:", error);
     }
   }
+  const loginAPI = async (payload) => {
+    try {
+      const response = await axios.post(
+        `http://192.168.1.81:5050/store_user`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error during API call:", error);
+      throw error;
+    }
+  };
+  const handleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const data = result?.user;
 
-  const handleSubmit = async (audioFile) => {
-    // event.preventDefault();
-
-    setLoader(true);
-
+      // You can access user details here
+      // const { email, displayName, photoURL, uid } = user;
+      const user = data?.providerData[0];
+      // Optionally call your API
+      const response = await loginAPI(user);
+      if (response?.stored_data?.user_id) {
+        // navigate("/Home");
+        const encryptedData = CryptoJS.AES.encrypt(
+          JSON.stringify(response?.stored_data),
+          secureKey
+        ).toString();
+        localStorage.setItem("user", encryptedData);
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+    } finally {
+    }
+    setShowDialog(false);
+  };
+  const handleOptions = () => {
+    setOpenDialog(true);
+  };
+  const handleLogout = () => {
+    localStorage.clear();
+    setOpenDialog(false);
+  };
+  const processAudioUpload = async (audioFile) => {
     let newAudioFile = audioFile?.recordedURL
       ? audioFile.recordedURL
       : audioFile;
@@ -227,111 +307,139 @@ function ListingScreen() {
     let fileName = audioFile?.fileName
       ? audioFile.fileName
       : "NewFile_" + new Date().getTime();
-    if (newAudioFile) {
-      const formData = new FormData();
-      formData.append("audio", newAudioFile); // 'audio' is the key for the file
-      formData.append("type", "input");
-      formData.append("userId", userDetails?.user_id);
-      try {
-        const response = await axios.post(
-          // `${protocol}//${APIURL}:5050/process_audio`,
-          `http://192.168.1.81:5050/process_audio`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-
-        console.log("File uploaded successfully:", response.data);
-
-        if (response?.data?.generated_speech_url) {
-          setTranscriptionProcessData(response?.data);
-          let outPutAudio = await fetchAudioAsBlob(
-            response?.data?.generated_speech_url
-          ).then(({ audioBlob, audioUrl }) => {
-            console.log("Blob:", audioBlob);
-            console.log("Audio URL:", audioUrl);
-            return { audioBlob: audioBlob, audioUrl: audioUrl };
-          });
-          let audio = new Audio(URL.createObjectURL(newAudioFile));
-
-          console.log(audioTime, "audioTime");
-
-          audio.onloadedmetadata = () => {
-            let duration = Math.floor(audio?.duration); // Truncate to whole seconds
-            console.log(`Audio duration: ${duration} seconds`);
-            setFileMetaData({
-              fileName: fileName,
-              duration: formatTime(duration) || "-",
-            });
-            // STEP DOWNLOAD BLOB FOR URL, Make it URL Again using new Audio(URL.createObjectURL())
-            setTranscriptionProcessData((prev) => ({
-              ...prev,
-              generated_speech_url: outPutAudio?.audioUrl,
-            }));
-            setNewBodyItem({
-              // title: fileName,
-              inputFile: fileName,
-              fileType: newAudioFile.type, // Assuming fileType is the same as inputFile
-              Transcription:
-                response.data.transcription || "Transcription not available", // Replace with actual transcription
-              duration: audioTime
-                ? formatTime(audioTime)
-                : formatTime(duration) || "-",
-              dateAndtime: new Date().toLocaleString(), // Get current date and time
-              audio: {
-                url: outPutAudio?.audioUrl,
-                type: newAudioFile.type,
-              },
-              input_file: {
-                icon_name: "bi:soundwave",
-                input_file_url: file ? URL.createObjectURL(file) : "",
-                styles: {
-                  color: "c3d9ff",
-                  fontSize: 15,
-                },
-              },
-              item_type: audioFile?.recordedURL
-                ? {
-                    icon_name: "ri:mic-fill",
-                    styles: {
-                      backgroundColor: "#5A97FF",
-                      fontSize: 15,
-                      padding: 3,
-                      borderRadius: 50,
-                      color: "#fff",
-                    },
-                  }
-                : {
-                    icon_name: "ic:baseline-upload",
-                    styles: {
-                      backgroundColor: "#ff898b",
-                      fontSize: 15,
-                      padding: 3,
-                      borderRadius: 50,
-                      color: "#fff",
-                    },
-                  },
-            });
-
-            // Dispatch the action to add the new body item
-
-            handleOpen("View");
-            setIsRecording(false);
-          };
+    const formData = new FormData();
+    formData.append("audio", newAudioFile); // 'audio' is the key for the file
+    formData.append("type", "input");
+    formData.append("user_id", userDetails?.user_id);
+    try {
+      setLoader(true);
+      const response = await axios.post(
+        // `${protocol}//${APIURL}:5050/process_audio`,
+        `http://192.168.1.81:5050/process_audio`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         }
-      } catch (error) {
-        setLoader(false);
+      );
 
-        console.error("Error uploading file:", error);
-      } finally {
-        setLoader(false);
+      console.log("File uploaded successfully:", response.data);
+
+      if (response?.data?.generated_speech_url) {
+        setTranscriptionProcessData(response?.data);
+        let outPutAudio = await fetchAudioAsBlob(
+          response?.data?.generated_speech_url
+        ).then(({ audioBlob, audioUrl }) => {
+          return { audioBlob: audioBlob, audioUrl: audioUrl };
+        });
+        let audio = new Audio(URL.createObjectURL(newAudioFile));
+
+        audio.onloadedmetadata = () => {
+          let duration = Math.floor(audio?.duration); // Truncate to whole seconds
+          setFileMetaData({
+            fileName: fileName,
+            duration: formatTime(duration) || "-",
+          });
+          // STEP DOWNLOAD BLOB FOR URL, Make it URL Again using new Audio(URL.createObjectURL())
+          setTranscriptionProcessData((prev) => ({
+            ...prev,
+            generated_speech_url: outPutAudio?.audioUrl,
+          }));
+          setNewBodyItem({
+            // title: fileName,
+            inputFile: fileName,
+            fileType: newAudioFile.type, // Assuming fileType is the same as inputFile
+            Transcription:
+              response.data.transcription || "Transcription not available", // Replace with actual transcription
+            duration: audioTime
+              ? formatTime(audioTime)
+              : formatTime(duration) || "-",
+            dateAndtime: new Date().toLocaleString(), // Get current date and time
+            audio: {
+              url: outPutAudio?.audioUrl,
+              type: newAudioFile.type,
+            },
+            input_file: {
+              icon_name: "bi:soundwave",
+              input_file_url: file ? URL.createObjectURL(file) : "",
+              styles: {
+                color: "c3d9ff",
+                fontSize: 15,
+              },
+            },
+            item_type: audioFile?.recordedURL
+              ? {
+                  icon_name: "ri:mic-fill",
+                  styles: {
+                    backgroundColor: "#5A97FF",
+                    fontSize: 15,
+                    padding: 3,
+                    borderRadius: 50,
+                    color: "#fff",
+                  },
+                }
+              : {
+                  icon_name: "ic:baseline-upload",
+                  styles: {
+                    backgroundColor: "#ff898b",
+                    fontSize: 15,
+                    padding: 3,
+                    borderRadius: 50,
+                    color: "#fff",
+                  },
+                },
+          });
+
+          // Dispatch the action to add the new body item
+
+          handleOpen("View");
+          setIsRecording(false);
+        };
       }
+    } catch (error) {
+      setLoader(false);
+
+      console.error("Error uploading file:", error);
+    } finally {
+      setLoader(false);
+    }
+  };
+
+  const handleSubmit = async (audioFile) => {
+    // event.preventDefault();
+
+    let newAudioFile = audioFile?.recordedURL
+      ? audioFile.recordedURL
+      : audioFile;
+
+    if (audioFile?.recordedURL) {
+      const audio1Blob = await fetch(audioFile?.recordedURL).then((res) =>
+        res.blob()
+      );
+      newAudioFile = audio1Blob;
+      setFile(audio1Blob);
+    }
+    if (newAudioFile) {
+      // if (!userDetails) {
+      //   // setTimeout(async () => {
+      //   try {
+      //     // await handleLogin(); // Attempt to log in
+      //     // setShowDialog(false); // Close the dialog after login attempt
+      //     // Check if the user is now logged in
+      //     if (userDetails) {
+      //       await processAudioUpload(newAudioFile); // Proceed with the upload
+      //     }
+      //   } catch (error) {
+      //     console.error("Error during auto login:", error);
+      //   }
+      //   // }, 5000);
+      // }
+      // else {
+      // }
+      await processAudioUpload(newAudioFile); // Proceed with the upload if user is logged in
     } else {
       alert("Please select an audio file");
-      setLoader(false);
     }
   };
 
@@ -367,10 +475,8 @@ function ListingScreen() {
   };
 
   const actionEmitter = (e) => {
-    console.log(e);
     if (e?.action?.key === "download") {
       handleDownload(e?.item);
-      console.log(e?.item, "e?.item");
     } else if (e?.action?.key === "delete") {
       // handleDownload(e?.item)
 
@@ -381,7 +487,6 @@ function ListingScreen() {
       // open a modal to play input value
     } else if (e?.action?.type === "openModel") {
       setDailogActions(false);
-      console.log(e?.data, "dataaa");
       setTranscriptionProcessData({
         transcription: e?.data?.Transcription,
         generated_speech_url: e?.data?.audio?.url,
@@ -407,12 +512,23 @@ function ListingScreen() {
             alignItems: "flex-end",
           }}
         >
-          <Icon
+          {/* <Icon
             icon="mdi:user"
             cursor="pointer"
-            // onClick={}
-            style={{ width: "40px", height: "40px" }}
-          />
+            onClick={() => handleOptions()}
+            style={{ width: "40p
+            x", height: "40px" }}
+          /> */}
+          {userDetails && (
+            <>
+              {userDetails?.displayName}
+              <img
+                src={userDetails?.photoURL}
+                onClick={() => handleOptions()}
+                alt="Logo"
+              />
+            </>
+          )}
         </div>
         <img src={logoPng} alt="Logo" className="logo" />
 
@@ -508,6 +624,7 @@ function ListingScreen() {
                       <label
                         className="browseButtonStyle"
                         htmlFor="fileInput"
+                        onClick={handleFileUploadClick}
                         style={{ cursor: "pointer" }}
                       >
                         Browse
@@ -757,7 +874,43 @@ function ListingScreen() {
           )}
         </DialogActions>
       </Dialog>
-
+      <Dialog
+        PaperProps={{
+          sx: { maxWidth: 720, borderRadius: "15px" },
+        }}
+        open={showDialog}
+        onClose={() => setShowDialog(false)}
+      >
+        <DialogTitle>Login Required</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Hi there! You need to log in before proceeding.
+          </Typography>
+          {/* <Typography variant="body2" color="textSecondary">
+            You will be redirected to the login screen.
+          </Typography> */}
+        </DialogContent>
+        <dailogActions>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-end",
+              justifyContent: "flex-end",
+              marginRight: 10,
+              marginBottom: 10,
+            }}
+          >
+            <Button
+              id="loginButton"
+              size="small"
+              variant="contained"
+              onClick={() => handleLogin()}
+            >
+              Login
+            </Button>
+          </div>
+        </dailogActions>
+      </Dialog>
       <Modal
         open={inputPlayerModal}
         onClose={handleInputModalClose}
@@ -817,6 +970,38 @@ function ListingScreen() {
           </div>
         </div>
       </Modal>
+      <Dialog
+        fullWidth
+        maxWidth={false}
+        open={openDialog}
+        PaperProps={{
+          sx: { maxWidth: 420, borderRadius: "15px", height: 120 },
+        }}
+      >
+        <DialogContent>
+          <Typography>Are you sure you want to logout</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            size="small"
+            variant="outlined"
+            sx={{ color: "black" }}
+            onClick={() => {
+              setOpenDialog(false);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            size="small"
+            variant="contained"
+            onClick={() => handleLogout()}
+            sx={{ backgroundColor: "#a8323a" }}
+          >
+            Logout
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

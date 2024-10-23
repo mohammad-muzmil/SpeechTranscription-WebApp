@@ -1,28 +1,26 @@
-import axios from "axios";
-import React, { useEffect, useCallback } from "react";
+import React, { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { signInWithPopup } from "firebase/auth";
+import CryptoJS from "crypto-js";
+import axios from "axios";
+import { auth, provider } from "../firebaseConfig";
+import { Button } from "@mui/material";
 
 const Login = () => {
-  const APIURL = window?.location.hostname;
-  let protocol = window.location.protocol;
-  const REACT_APP_GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-  const CryptoJS = require("crypto-js");
   const navigate = useNavigate();
   const secureKey = process.env.REACT_APP_SECURE_KEY;
-  const handleCallbackResponse = useCallback(async (response) => {
-    // The response includes a JWT token with user info
-    console.log("Encoded JWT ID token: ", response.credential);
 
-    // You can decode the JWT to get user information
-    const decodedToken = JSON.parse(atob(response.credential.split(".")[1]));
-    console.log("Decoded user info:", decodedToken);
+  const handleLogin = useCallback(async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const data = result?.user;
 
-    // Access user details
-    const { email, name, picture, sub: userId } = decodedToken;
-
-    if (decodedToken) {
-      const response = await loginAPI(decodedToken);
-      console.log(response, "response");
+      // You can access user details here
+      // const { email, displayName, photoURL, uid } = user;
+      const user = data?.providerData[0];
+      console.log(user, "user");
+      // Optionally call your API
+      const response = await loginAPI(user);
       if (response?.data?.stored_data?.user_id) {
         navigate("/Home");
         const encryptedData = CryptoJS.AES.encrypt(
@@ -31,43 +29,11 @@ const Login = () => {
         ).toString();
         localStorage.setItem("user", encryptedData);
       }
+    } catch (error) {
+      console.error("Error during login:", error);
     }
-  }, []);
+  }, [navigate]);
 
-  useEffect(() => {
-    // Load the Google Identity Services script
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-
-    script.onload = () => {
-      // Initialize Google Identity Services
-      window.google.accounts.id.initialize({
-        client_id: REACT_APP_GOOGLE_CLIENT_ID,
-        callback: handleCallbackResponse,
-      });
-
-      // Render the Google Sign-In button
-      window.google.accounts.id.renderButton(
-        document.getElementById("google-signin-button"),
-        {
-          theme: "outline",
-          size: "medium",
-          type: "standard",
-        }
-      );
-
-      // Optionally, display the One Tap dialog
-      window.google.accounts.id.prompt();
-    };
-
-    // Cleanup
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, [handleCallbackResponse]);
   const loginAPI = async (payload) => {
     try {
       const response = await axios.post(
@@ -75,22 +41,32 @@ const Login = () => {
         payload,
         {
           headers: {
-            "Content-Type": "application/json", // Set content type to JSON
+            "Content-Type": "application/json",
           },
         }
       );
-      console.log(response, "response");
-      return response.data; // Return the response data if needed
+      return response.data;
     } catch (error) {
       console.error("Error during API call:", error);
-      throw error; // Optionally re-throw the error for further handling
+      throw error;
     }
   };
+
   return (
-    <div>
-      {/* The button will be rendered inside this div */}
-      <div id="google-signin-button"></div>
-    </div>
+    <>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "20%",
+        }}
+      >
+        <Button onClick={handleLogin} variant="contained">
+          Sign in with Google
+        </Button>
+      </div>
+    </>
   );
 };
 
