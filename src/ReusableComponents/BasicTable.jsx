@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -8,19 +8,64 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Icon } from "@iconify/react";
 import { Box, Tooltip } from "@mui/material";
+import { BASEURL } from "./BaseURL";
 
 const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
   const currentAudioRef = useRef(null);
-  const handleAudioPlay = (event) => {
+  const [audioURLs, setAudioURLs] = useState({
+    input: {},
+    output: {},
+  });
+
+  const inputAudio = async (url, id) => {
+    try {
+      const response = await fetch(
+        BASEURL +"temp_url?fileName=" + url
+      );
+      const data = await response.json();
+      setAudioURLs((prev) => ({
+        ...prev,
+        input: {
+          ...prev.input,
+          [id]: data.temp_URL, // Store the URL with the record ID
+        },
+      }));
+    } catch (error) {
+      console.error("Error fetching input audio URL:", error);
+    }
+  };
+
+  const outputAudio = async (url, id) => {
+    // Similar logic for output audio
+    try {
+      const response = await fetch(
+         BASEURL +"temp_url?fileName=" + url
+      );
+      const data = await response.json();
+      setAudioURLs((prev) => ({
+        ...prev,
+        output: {
+          ...prev.output,
+          [id]: data.temp_URL, // Store the URL with the record ID
+        },
+      }));
+    } catch (error) {
+      console.error("Error fetching output audio URL:", error);
+    }
+  };
+
+  const handleAudioPlay = async (event) => {
     // If there's already an audio playing, pause it
     if (currentAudioRef.current && currentAudioRef.current !== event.target) {
       currentAudioRef.current.pause();
       currentAudioRef.current.currentTime = 0; // Reset time if you want
     }
+    // Fetch the audio URL when play is clicked
 
     // Update the reference to the currently playing audio
     currentAudioRef.current = event.target;
   };
+
   const headerStyles = {
     color: "#000000",
     fontWeight: 600,
@@ -56,7 +101,7 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
         <TableHead>
           <TableRow sx={{ borderBottom: "1.5px solid #BCD4FF" }}>
             {metaData.requiredSerialNumber && (
-              <TableCell align="left" style={headerStyles}>
+              <TableCell align="center" style={headerStyles}>
                 S.No
               </TableCell>
             )}
@@ -85,10 +130,14 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
             body.map((row, index) => (
               <TableRow
                 key={row[header[0].key]}
+                ali
                 sx={{ borderBottom: "1.5px solid #BCD4FF" }}
               >
-                {metaData.requiredSerialNumber && (
-                  <TableCell align="left" style={bodyStyles}>
+                {metaData?.requiredSerialNumber && (
+                  <TableCell
+                    align="center"
+                    sx={{ ...bodyStyles, textAlign: "center" }}
+                  >
                     {metaData?.paginatedSerialNumber &&
                     metaData?.paginationMetaData
                       ? (metaData.paginationMetaData.page - 1) *
@@ -111,20 +160,24 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                           cursor: "pointer",
                         }),
                       }}
-                      onClick={() =>
-                        actionEmitter && column?.onClickEmittToParent
-                          ? actionEmitter({
-                              action: { type: "rowClick" },
-                              header: column,
-                              data: row,
-                            })
-                          : column?.openModel
-                          ? actionEmitter({
-                              action: { type: "openModel" },
-                              header: column,
-                              data: row,
-                            })
-                          : {}
+                      onClick={
+                        () =>
+                          actionEmitter && column?.onClickEmittToParent
+                            ? actionEmitter({
+                                action: { type: column?.actionType },
+                                header: column,
+                                data: row,
+                              })
+                            : column?.openModel
+                            ? actionEmitter({
+                                action: { type: "openModel" },
+                                header: column,
+                                data: row,
+                              })
+                            : column?.apiCall && column?.actionType === "input"
+                            ? inputAudio(row[column?.key], index)
+                            : outputAudio(row[column?.key], index)
+                        //  {}
                       }
                     >
                       {column?.type === "text" && (
@@ -151,16 +204,20 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                             <p
                               style={{
                                 padding: 0,
-                                margin: 0,
+      margin: 0,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      display: '-webkit-box',
+      WebkitLineClamp: 2,
+      WebkitBoxOrient: 'vertical',
                               }}
                             >
-                              {" "}
-                              {row[column.key]
-                                ? truncateText(row[column.key], 20)
-                                : "-"}
+                              {row[column?.key]
+                                ? row[column?.key]
+                                : " - "}
                             </p>
                           )}{" "}
-                          {column?.hasIcon && (
+                          {column?.hasIcon && row[column?.key] && (
                             <p
                               title={column?.hasIcon?.tooltip}
                               style={{
@@ -174,27 +231,47 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                               }}
                             >
                               {" "}
-                              <Icon
-                                icon={column?.hasIcon?.icon_name}
-                                style={{
-                                  marginRight: "10px",
-                                  ...(column?.hasIcon?.styles || {}),
-                                }}
-                                cursor="pointer"
-                              />
+                              {(column?.actionType === "input" &&
+                                audioURLs.input[index]) ||
+                              (column?.actionType === "output" &&
+                                audioURLs.output[index]) ? (
+                                <audio
+                                  controls
+                                  style={{
+                                    backgroundColor: "transparent",
+                                    height: "30px",
+                                    width: "300px",
+                                    outline: "none",
+                                  }}
+                                  onPlay={(e) =>
+                                    handleAudioPlay(e)
+                                  }
+                                >
+                                  <source
+                                    src={
+                                      column.actionType === "input"
+                                        ? audioURLs.input[index]
+                                        : audioURLs.output[index]
+                                    }
+                                    type="audio/mpeg"
+                                  />
+                                  Your browser does not support the audio
+                                  element.
+                                </audio>
+                              ) : (
+                                <Icon
+                                  icon={column?.hasIcon?.icon_name}
+                                  style={{
+                                    marginRight: "10px",
+                                    ...(column?.hasIcon?.styles || {}),
+                                  }}
+                                  cursor="pointer"
+                                />
+                              )}
                             </p>
                           )}
                         </div>
                       )}
-                      {/* {
-                        column?.type ==="Transcription" &&
-                        (
-                          <>
-                          {row[column?.key]?.length< ? row[column.key]: "-"}
-                          </>
-                        )
-                      } */}
-
                       {column?.type === "audio" && (
                         // <ReactAudioPlayer src="https://commondatastorage.googleapis.com/codeskulptor-assets/Collision8-Bit.ogg" autoPlay controls style={{ backgroundColor: 'transparent' }} // Remove background color
                         // />
@@ -209,10 +286,7 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                             }}
                             onPlay={handleAudioPlay}
                           >
-                            <source
-                              src={row[column?.type]?.url}
-                              type="audio/mpeg"
-                            />
+                            {/* <source src={inputPlayerURL} type="audio/mpeg" /> */}
                             Your browser does not support the audio element.
                           </audio>
                         </>
@@ -247,7 +321,6 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                       )}
                     </TableCell>
 
-                    {console.log(row[column.key], "row[column.key]")}
                   </>
                 ))}
                 {actions && actions.length > 0 && (
@@ -256,10 +329,6 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                     sx={{
                       ...bodyStyles,
                       ...{ borderBottom: 0 },
-                      // ...(column?.icon_key && row?.[column?.icon_key]?.icon_name && {
-
-                      //   // justifyContent: 'start'
-                      // })
                     }}
                   >
                     <Box display="flex" gap={1}>

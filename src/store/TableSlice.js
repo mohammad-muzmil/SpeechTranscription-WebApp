@@ -19,7 +19,9 @@ const initialState = {
       type: "text",
       subType: "voice_wave",
       // icon_key: "input_file",
-      onClickEmittToParent: true,
+      // onClickEmittToParent: true,
+      apiCall:true,
+       actionType:"input",
       body_styles: {
         fontSize: 25,
         color: "#669EFF",
@@ -27,7 +29,7 @@ const initialState = {
       // <iconify-icon icon="flat-color-icons:speaker"></iconify-icon>
       hasIcon: {
         alignment: "right",
-        icon_name: "flat-color-icons:speaker",
+        icon_name: "fluent-emoji:play-button",
         input_file_url: "",
         tooltip: "Click to Listen",
         styles: {
@@ -38,10 +40,10 @@ const initialState = {
           // position: "absolute",
 
           // borderRadius: 50,
-          color: "#0560FD",
+          // color: "#0560FD",
         },
       },
-      noText: false,
+      noText: true,
       customHeaderStyles: {
         minWidth: "70px",
       },
@@ -61,14 +63,14 @@ const initialState = {
       type: "text",
       subType: "",
       customHeaderStyles: {
-        minWidth: "150px",
+        minWidth: "50px",
       },
       openModel: true,
       hasIcon: {
         alignment: "right",
         icon_name: "quill:link-out",
         input_file_url: "",
-        tooltip: "Click to Listen",
+        tooltip: "Click to see Full Transcription",
         styles: {
           // backgroundColor: "#5A97FF",
           fontSize: 17,
@@ -82,35 +84,28 @@ const initialState = {
       },
     },
 
+    // {
+    //   key: "duration",
+    //   label: "Duration",
+    //   type: "text",
+    //   subType: "",
+    //   customHeaderStyles: {
+    //     minWidth: "70px",
+    //   },
+    // },
     {
-      key: "duration",
-      label: "Duration",
-      type: "text",
-      subType: "",
-      customHeaderStyles: {
-        minWidth: "70px",
-      },
-    },
-    {
-      key: "dateAndtime",
-      label: "Input Date & Time",
-      type: "dateAndtime",
-      subType: "",
-      customHeaderStyles: {
-        minWidth: "100px",
-      },
-    },
-    {
-      key: "play",
+      key: "outputFile",
       label: "Output Audio",
       type: "text",
       subType: "voice_wave",
-      onClickEmittToParent: true,
-      noText: false,
+      // onClickEmittToParent: true,
+       actionType:"output",
+      apiCall:true,
+      noText: true,
       hasIcon: {
         alignment: "right",
-        icon_name: "flat-color-icons:speaker",
-        input_file_url: "",
+        icon_name: "fluent-emoji:play-button",
+        output_file_url: "",
         tooltip: "Click to Listen",
         styles: {
           // backgroundColor: "#5A97FF",
@@ -120,12 +115,20 @@ const initialState = {
           // position: "absolute",
 
           // borderRadius: 50,
-          color: "#0560FD",
+          // color: "#0560FD",
         },
       },
-      noText: false,
       customHeaderStyles: {
         minWidth: "150px",
+      },
+    },
+    {
+      key: "dateAndtime",
+      label: "Date & Time",
+      type: "dateAndtime",
+      subType: "",
+      customHeaderStyles: {
+        minWidth: "100px",
       },
     },
   ],
@@ -401,6 +404,7 @@ const initialState = {
       label: "Delete",
       icon: "fluent:delete-28-regular",
       color: "red",
+      onClickEmittToParent: true,
     },
   ],
 };

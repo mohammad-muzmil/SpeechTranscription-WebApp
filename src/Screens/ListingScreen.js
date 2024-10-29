@@ -1,12 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./ListingScreen.css"; // Import the CSS file for styling
-import logoPng from "./../assets/images/logo.png";
+// import logoPng from "./../assets/images/logo.png";
+import logo from "./../assets/images/logo.png";
 import BasicTable from "../ReusableComponents/BasicTable";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Avatar,
+  Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -24,12 +27,13 @@ import {
 import axios from "axios";
 import AudioLoader from "../ReusableComponents/AudioLoaders/AudioLoader";
 import ModalHeader from "../ReusableComponents/ModelHeader";
-
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { auth, provider } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
+import { ConfirmationDialog } from "../ReusableComponents/ConfirmationDialog";
+import { BASEURL } from "../ReusableComponents/BaseURL";
 
 function ListingScreen() {
   const APIURL = window?.location.hostname;
@@ -37,19 +41,25 @@ function ListingScreen() {
   const CryptoJS = require("crypto-js");
   const navigate = useNavigate();
   const secureKey = process.env.REACT_APP_SECURE_KEY;
-
+  const [respDatastate, setrespDatastate] =useState(null)
   const [active, setActive] = useState("upload");
   const [isRecording, setIsRecording] = useState(false);
-  const [showDialog, setShowDialog] = useState(false);
+  const [metaData , setMetaData]= useState(null);
+  // const [showDialog, setShowDialog] = useState(false);
+  const [bodys,setBodys] = useState([]);
   const [file, setFile] = useState(null);
   const [fileMetData, setFileMetaData] = useState({});
   const [loader, setLoader] = useState(false);
-  const [inputPlayerModal, setInputPlayerModal] = useState(false);
-  const [inputPlayerURL, setInputPlayerURL] = useState("");
-  const [transcriptionProcessData, setTranscriptionProcessData] = useState();
+  // const [inputPlayerModal, setInputPlayerModal] = useState(false);
+  // const [outputPlayerModal, setOutputPlayerModal] = useState(false);
+  // const [inputPlayerURL, setInputPlayerURL] = useState("");
+  // const [outputPlayerURL, setOutputPlayerURL] = useState("");
+  const [transcriptionProcessData, setTranscriptionProcessData] = useState(null);
   const [newBodyItem, setNewBodyItem] = useState({});
   const [open, setOpen] = useState(false);
   const [logoutDailog, setLogoutDailog] = useState(false);
+  const [deleteConfirm , setDeleteConfirm] = useState(false);
+  const [deletePayload,setDeletePayload] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [audioTime, setAudioTime] = useState(null);
@@ -72,6 +82,42 @@ function ListingScreen() {
   const ResetDefault = () => {
     setIsRecording(false);
   };
+  function CircularProgressWithLabel(props) {
+    return (
+      <Box
+  sx={{
+    position: 'fixed', // Use 'fixed' to center it in the viewport
+    top: '50%',        // Move down 50% of the viewport height
+    left: '50%',       // Move right 50% of the viewport width
+    transform: 'translate(-50%, -50%)', // Adjust back by half its own size
+    display: 'inline-flex',
+  }}
+>
+  <CircularProgress variant="determinate" {...props}  size={100}/>
+  <Box
+    sx={{
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0,
+      position: 'absolute',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
+    <Typography
+     variant="h6"
+      component="div"
+      sx={{ color: 'black' }}
+    >
+      {`${Math.round(props.value)}%`}
+    </Typography>
+  </Box>
+</Box>
+
+    );
+  }
 
   const getRecordTime = (time) => {
     setAudioTime(time);
@@ -167,22 +213,19 @@ function ListingScreen() {
     },
   };
 
-  // {
-  //   "generated_speech_url": "https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3",
-  //   "total_response_time": "17.87 seconds",
-  //   "transcription": "Manai, known as the Lazy Bug, seemed indifferent at work, arriving late, sipping coffee, and moving slowly. His colleagues believed he wasn't pulling his weight, always underestimating him. However, when the company faced a massive, buggy project with a tight deadline, panic struck the team, except Manai. Calmly observing, he surprised everyone by solving the complex issues effortlessly at the last minute, saving the project. What appeared to be laziness was, in fact, quiet genius. Manai was no longer seen as lazy, but as a brilliant problem solver, who worked on his own terms.",
-  //   "transcription_time": "6.19 seconds",
-  //   "tts_generation_time": "11.68 seconds"
-  // }
-  const StoreData = () => {
-    let data = newBodyItem;
-    data["title"] = fileMetData?.fileName;
-    data["input_file"]["input_file_url"] = URL.createObjectURL(file);
-    dispatch(addBodyItem(data));
-    setOpen(false);
-    setAudioTime(null);
+
+  const fetchData = async () => {
+    try {
+      const data = await getData("get_user_records/" + userDetails?.user_id);
+      setBodys(data?.user_records
+      );
+    } catch (error) {
+      console.error("Error fetching user records:", error);
+    }
   };
 
+let inputAudio;
+let outputAudio;
   const handleDownload = async (dataInput) => {
     try {
       const zip = new JSZip();
@@ -190,10 +233,13 @@ function ListingScreen() {
       // Add text content
       const textContent = dataInput?.Transcription;
       zip.file("transcription.txt", textContent);
+       inputAudio = await getData('temp_url?fileName=' + dataInput?.inputFile);
+       outputAudio = await getData('temp_url?fileName=' + dataInput?.outputFile);
 
       // Add audio files (Assuming the audio files are in the `public` folder or URLs)
-      const audio1Url = dataInput?.input_file?.input_file_url; // Replace with your actual path
-      const audio2Url = dataInput?.audio?.url; // Replace with your actual path
+      
+      const audio1Url = inputAudio?.temp_URL; // Replace with your actual path
+      const audio2Url = outputAudio?.temp_URL; // Replace with your actual path
 
       // Fetch audio files as blobs
       const audio1Blob = await fetch(audio1Url).then((res) => res.blob());
@@ -250,7 +296,7 @@ function ListingScreen() {
   const loginAPI = async (payload) => {
     try {
       const response = await axios.post(
-        `http://192.168.1.81:5050/store_user`,
+        BASEURL + `store_user`,
         payload,
         {
           headers: {
@@ -264,30 +310,30 @@ function ListingScreen() {
       throw error;
     }
   };
-  const handleLogin = async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const data = result?.user;
+  // const handleLogin = async () => {
+  //   try {
+  //     const result = await signInWithPopup(auth, provider);
+  //     const data = result?.user;
 
-      // You can access user details here
-      // const { email, displayName, photoURL, uid } = user;
-      const user = data?.providerData[0];
-      // Optionally call your API
-      const response = await loginAPI(user);
-      if (response?.stored_data?.user_id) {
-        // navigate("/Home");
-        const encryptedData = CryptoJS.AES.encrypt(
-          JSON.stringify(response?.stored_data),
-          secureKey
-        ).toString();
-        localStorage.setItem("user", encryptedData);
-      }
-    } catch (error) {
-      console.error("Error during login:", error);
-    } finally {
-    }
-    setShowDialog(false);
-  };
+  //     // You can access user details here
+  //     // const { email, displayName, photoURL, uid } = user;
+  //     const user = data?.providerData[0];
+  //     // Optionally call your API
+  //     const response = await loginAPI(user);
+  //     if (response?.stored_data?.user_id) {
+  //       // navigate("/Home");
+  //       const encryptedData = CryptoJS.AES.encrypt(
+  //         JSON.stringify(response?.stored_data),
+  //         secureKey
+  //       ).toString();
+  //       localStorage.setItem("user", encryptedData);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error during login:", error);
+  //   } finally {
+  //   }
+
+  // };
   const handleOptions = () => {
     setOpenDialog(true);
   };
@@ -309,30 +355,52 @@ function ListingScreen() {
     localStorage.clear();
     navigate("/")
   };
-  const processAudioUpload = async (audioFile) => {
-    let newAudioFile = audioFile?.recordedURL
-      ? audioFile.recordedURL
-      : audioFile;
 
+  useEffect(() => {
+    if (userDetails?.user_id) {
+      fetchData();
+    }
+  }, [])
+  let fileName;
+  let duration;
+  let newAudioFile;
+  let respData;
+  const processAudioUpload = async (audioFile) => {
+    newAudioFile = audioFile?.recordedURL ? audioFile.recordedURL : audioFile;
+  
+   
     if (audioFile?.recordedURL) {
-      const audio1Blob = await fetch(audioFile?.recordedURL).then((res) =>
-        res.blob()
-      );
+      const audio1Blob = await fetch(audioFile?.recordedURL).then((res) => res.blob());
       newAudioFile = audio1Blob;
       setFile(audio1Blob);
     }
-    let fileName = audioFile?.fileName
-      ? audioFile.fileName
-      : "NewFile_" + new Date().getTime();
+  
+    // Set the file name based on the input
+    fileName = audioFile?.fileName ? audioFile.fileName : "NewFile_" + new Date().getTime();
+  
+    const audio = new Audio(URL.createObjectURL(newAudioFile));
+    audio.onloadedmetadata = () => {
+      duration = Math.floor(audio.duration); // Get the duration in seconds
+    };
+  
+    // Wait for audio metadata to load
+    await new Promise((resolve) => {
+      audio.onloadedmetadata = () => {
+        duration = Math.floor(audio.duration);
+        resolve();
+      };
+    });
+  
+    
+
     const formData = new FormData();
-    formData.append("audio", newAudioFile); // 'audio' is the key for the file
+    formData.append("audio", newAudioFile);
     formData.append("type", "input");
     formData.append("user_id", userDetails?.user_id);
     try {
       setLoader(true);
       const response = await axios.post(
-        // `${protocol}//${APIURL}:5050/process_audio`,
-        `http://192.168.1.81:5050/process_audio`,
+        BASEURL + `process_audio`,
         formData,
         {
           headers: {
@@ -340,89 +408,135 @@ function ListingScreen() {
           },
         }
       );
+       respData = { ...response?.data };
 
-      console.log("File uploaded successfully:", response.data);
+  
+      if (respData?.generated_speech_url) {
+        respData['play'] = respData?.generated_speech_url;
+        const response = await getData('temp_url?fileName=' + respData?.generated_speech_url);
+        respData['play_url'] = response.temp_URL;
+      }
+  
+      if (respData?.input_audio_url) {
+        respData['inputFile'] = respData?.input_audio_url;
+        const response = await getData('temp_url?fileName=' + respData?.input_audio_url);
+        respData['inputFile_url'] = response.temp_URL;
+  
 
-      if (response?.data?.generated_speech_url) {
-        setTranscriptionProcessData(response?.data);
-        let outPutAudio = await fetchAudioAsBlob(
-          response?.data?.generated_speech_url
-        ).then(({ audioBlob, audioUrl }) => {
-          return { audioBlob: audioBlob, audioUrl: audioUrl };
-        });
-        let audio = new Audio(URL.createObjectURL(newAudioFile));
-
-        audio.onloadedmetadata = () => {
-          let duration = Math.floor(audio?.duration); // Truncate to whole seconds
-          setFileMetaData({
-            fileName: fileName,
-            duration: formatTime(duration) || "-",
-          });
-          // STEP DOWNLOAD BLOB FOR URL, Make it URL Again using new Audio(URL.createObjectURL())
-          setTranscriptionProcessData((prev) => ({
-            ...prev,
-            generated_speech_url: outPutAudio?.audioUrl,
-          }));
-          setNewBodyItem({
-            // title: fileName,
-            inputFile: fileName,
-            fileType: newAudioFile.type, // Assuming fileType is the same as inputFile
-            Transcription:
-              response.data.transcription || "Transcription not available", // Replace with actual transcription
-            duration: audioTime
-              ? formatTime(audioTime)
-              : formatTime(duration) || "-",
-            dateAndtime: new Date().toLocaleString(), // Get current date and time
-            audio: {
-              url: outPutAudio?.audioUrl,
-              type: newAudioFile.type,
+      }
+ 
+      setMetaData({newAudioFile:newAudioFile?.type,duration:audioTime ? formatTime(audioTime):formatTime(duration),fileName:fileName})
+      setrespDatastate(respData);
+      if (respData?.generated_speech_url) {
+        setTranscriptionProcessData(respData);
+        
+        setTranscriptionProcessData((prev) => ({
+          ...prev,
+          generated_speech_url: respData?.play_url,
+        }));
+  
+        setNewBodyItem({
+          inputFile: fileName,
+          fileType: newAudioFile.type,
+          Transcription: response.data.transcription || "Transcription not available",
+          duration: formatTime(duration) || "-",
+          dateAndtime: new Date().toLocaleString(),
+          outputFile: respData?.play,
+          output_file: {
+            icon_name: "bi:soundwave",
+            // output_file_url: respData?.generated_speech_url,
+            styles: {
+              color: "c3d9ff",
+              fontSize: 15,
             },
-            input_file: {
-              icon_name: "bi:soundwave",
-              input_file_url: file ? URL.createObjectURL(file) : "",
-              styles: {
-                color: "c3d9ff",
-                fontSize: 15,
-              },
+          },
+          input_file: {
+            icon_name: "bi:soundwave",
+            // input_file_url: file ? URL.createObjectURL(file) : "",
+            styles: {
+              color: "c3d9ff",
+              fontSize: 15,
             },
-            item_type: audioFile?.recordedURL
-              ? {
-                  icon_name: "ri:mic-fill",
-                  styles: {
-                    backgroundColor: "#5A97FF",
-                    fontSize: 15,
-                    padding: 3,
-                    borderRadius: 50,
-                    color: "#fff",
-                  },
-                }
-              : {
-                  icon_name: "ic:baseline-upload",
-                  styles: {
-                    backgroundColor: "#ff898b",
-                    fontSize: 15,
-                    padding: 3,
-                    borderRadius: 50,
-                    color: "#fff",
-                  },
+          },
+          item_type: audioFile?.recordedURL
+            ? {
+                icon_name: "ri:mic-fill",
+                styles: {
+                  backgroundColor: "#5A97FF",
+                  fontSize: 15,
+                  padding: 3,
+                  borderRadius: 50,
+                  color: "#fff",
                 },
-          });
-
-          // Dispatch the action to add the new body item
-
-          handleOpen("View");
-          setIsRecording(false);
-        };
+              }
+            : {
+                icon_name: "ic:baseline-upload",
+                styles: {
+                  backgroundColor: "#ff898b",
+                  fontSize: 15,
+                  padding: 3,
+                  borderRadius: 50,
+                  color: "#fff",
+                },
+              },
+        });
+  
+        // handleOpen("View");
+        setIsRecording(false);
+       
       }
     } catch (error) {
-      setLoader(false);
-
       console.error("Error uploading file:", error);
     } finally {
       setLoader(false);
+      // transcriptionProcessData &&  metaDataApi();
     }
   };
+  const metaDataApi = useCallback(async () => {
+    const payload = {
+      inputFile: transcriptionProcessData?.inputFile,
+      duration: metaData?.duration,
+      fileType: metaData?.newAudioFile,
+      dateAndtime: new Date().toLocaleString(),
+      outputFile: transcriptionProcessData?.play,
+      Transcription: transcriptionProcessData?.transcription,
+      user_id: transcriptionProcessData?.user_id,
+    };
+    
+    try {
+      const response = await axios.post(
+        BASEURL + 'save_metadata',
+        payload,
+      );
+      fetchData(); // Ensure fetchData is defined in your component
+    } catch (error) {
+      console.error(error);
+    }
+  }, [transcriptionProcessData?.user_id, metaData]); // Include dependencies
 
+  useEffect(() => {
+    if (active) { // Check if active is true before calling the API
+      metaDataApi();
+    }
+  }, [metaDataApi, active]);
+
+
+
+  const getData = async (url) => {
+    try {
+      const response = await axios.get( BASEURL + url);
+      return response.data; // Return the data from the response
+    } catch (error) {
+      console.error('Error posting data:', error);
+      throw error; // Rethrow the error for further handling
+    }
+  };
+  const handleOutputAudio = async()=>{
+    // console.log(transcriptionProcessData,"transcriptionProcessData");
+    
+    // const res  = await getData('temp_url?fileName=' + transcriptionProcessData?.inputFile)
+    // return res?.temp_URL;
+  }
   const handleSubmit = async (audioFile) => {
     // event.preventDefault();
 
@@ -438,42 +552,56 @@ function ListingScreen() {
       setFile(audio1Blob);
     }
     if (newAudioFile) {
-      // if (!userDetails) {
-      //   // setTimeout(async () => {
-      //   try {
-      //     // await handleLogin(); // Attempt to log in
-      //     // setShowDialog(false); // Close the dialog after login attempt
-      //     // Check if the user is now logged in
-      //     if (userDetails) {
-      //       await processAudioUpload(newAudioFile); // Proceed with the upload
-      //     }
-      //   } catch (error) {
-      //     console.error("Error during auto login:", error);
-      //   }
-      //   // }, 5000);
-      // }
-      // else {
-      // }
       await processAudioUpload(newAudioFile); // Proceed with the upload if user is logged in
     } else {
       alert("Please select an audio file");
     }
   };
+  const disguardApi = async()=>{
+    const payload = {
+      files:[transcriptionProcessData?.inputFile , transcriptionProcessData?.play]
+    }
+    const res = await axios.post(BASEURL +"remove_audio_s3",payload)
+    fetchData();
+  }
+  const handleDeleteCancel = ()=>{
+    setDeleteConfirm(false);
 
-  const handleClose = () => {
+  }
+  const handleDelete =(payload)=>{
+    deleteApi(payload);
+    setDeleteConfirm(false);
+  }
+  const handleDeleteConfirm = ()=>{
+    // setDeletePayload(true)
+    handleDelete(deletePayload)
+    
+  }
+  const deleteApi = async(payload)=>{
+    
+    const res = await axios.post( BASEURL +"remove_record",payload)
+    fetchData();
+  }
+  const handleClose = (type) => {
     setOpen(!open);
+    if(type==="clear")
+      disguardApi();
   };
 
-  const handleInputModalClose = () => {
-    setInputPlayerModal(false);
-  };
+  // const handleInputModalClose = () => {
+  //   setInputPlayerModal(false);
+  // };
+  // const handleOutputModalClose = () => {
+  //   setOutputPlayerModal(false);
+  // };
   const handleOpen = (type) => {
     setOpen(true);
     if (type === "View") {
       setDailogActions(true);
     }
+
   };
-  const { header, body, actions } = useSelector((state) => state.data);
+  const { header,body, actions } = useSelector((state) => state.data);
   const dispatch = useDispatch();
 
   const handleFileNameClick = () => {
@@ -491,50 +619,93 @@ function ListingScreen() {
     // setFileName(e.target.value);
   };
 
-  const actionEmitter = (e) => {
+  const actionEmitter = async(e) => {
     if (e?.action?.key === "download") {
+      
       handleDownload(e?.item);
     } else if (e?.action?.key === "delete") {
       // handleDownload(e?.item)
-
-      dispatch(removeBodyItem(e?.item));
-    } else if (e?.action?.type === "rowClick") {
-      setInputPlayerURL(e?.data?.input_file?.input_file_url);
-      setInputPlayerModal(true);
+      // deleteApi(e?.item)
+      
+      setDeleteConfirm(true);
+      setDeletePayload(e?.item);
+      // console.log(e?.item,"muzz");
+      
+      // dispatch(removeBodyItem(e?.item));
+    } 
+    // else if (e?.action?.type === "input") {
+    
+      // inputAudio()
+      // setInputPlayerModal(true);
+      // console.log(e?.data,"rammmmmm");
+      
       // open a modal to play input value
-    } else if (e?.action?.type === "openModel") {
+    // } 
+    // else if (e?.action?.type === "output") {
+    //   setOutputPlayerModal(true);
+    //   async function call (){
+
+    //     const output_audio_url = await getData('http://192.168.1.81:5050/temp_url?fileName=' + e?.data?.outputFile)
+    //      setOutputPlayerURL(output_audio_url?.temp_URL);      
+    //   }
+    //   call()
+    //   // open a modal to play input value
+    //   // console.log(e?.data,"rammmmmm");
+    // } 
+    else if (e?.action?.type === "openModel") {
+      let input_audio_url;
+      let output_audio_url;
+      
+      input_audio_url = await getData('temp_url?fileName=' + e?.data?.inputFile)
+      output_audio_url = await getData('temp_url?fileName=' + e?.data?.outputFile)
       setDailogActions(false);
       setTranscriptionProcessData({
         transcription: e?.data?.Transcription,
-        generated_speech_url: e?.data?.audio?.url,
-        input_audio: e?.data?.input_file?.input_file_url,
+        generated_speech_url: output_audio_url?.temp_URL,
+        input_audio: input_audio_url?.temp_URL,
         duration: e?.data?.duration,
         fileName: e?.data?.inputFile,
       });
+      
       setFileMetaData({
         fileName: e?.data?.inputFile,
         duration: e?.data?.duration,
       });
       setFile(null);
       handleOpen();
+      
     }
   };
+
   return (
     <div className="container">
       <div className="top-section">
         
         <div className="flex-properties-corner">
-        <img src={logoPng} alt="Logo" className="logo" />
+        <img src={logo} alt="Logo" className="logo" />
+        {/* <Avatar 
+        src={logo} 
+        alt={"User Avatar"}
+        sx={{
+          width: 45,
+          height: 45,
+          cursor: "pointer",
+          marginTop: "7px",
+        }}
+        /> */}
+          <p className="headerTitle">
+            Speech Transcription and Real-Time Processing
+          </p>
 
         <Avatar
               src={userDetails?.photoURL}
               alt={userDetails?.displayName || "User Avatar"}
               onClick={() => handleOptions()}
               sx={{
-                width: 50,
-                height: 50,
+                width: 45,
+                height: 45,
                 cursor: "pointer",
-                marginTop: "10px",
+                marginTop: "7px",
               }}
             />
   <Popover
@@ -603,9 +774,9 @@ function ListingScreen() {
         </div>
    
         <div className="headerContent">
-          <p className="headerTitle">
+          {/* <p className="headerTitle">
             Speech Transcription and Real-Time Processing
-          </p>
+          </p> */}
           <div className="centerRuler"></div>
 
           <div className="recordSectionContainer">
@@ -716,15 +887,19 @@ function ListingScreen() {
                 </div>
               ) : (
                 <>
-                  {isRecording ? (
+                  {/* {isRecording ? ( */}
                     <>
                       <AudioRecorder
                         handleSubmit={handleSubmit}
                         ResetDefault={ResetDefault}
                         getRecordTime={getRecordTime}
+                        handleOutputAudio = {handleOutputAudio}
+                        metaDataApi={metaDataApi}
+                        respData={respDatastate}
                       />
                     </>
-                  ) : (
+                  {/* ) 
+                  : (
                     <span
                       className="recordSectionContainer recordL1"
                       onClick={() => setIsRecording(true)}
@@ -743,7 +918,8 @@ function ListingScreen() {
                         </p>
                       </div>
                     </span>
-                  )}
+                  )
+                  } */}
                 </>
 
                 // <Grid2
@@ -797,13 +973,20 @@ function ListingScreen() {
 
         <BasicTable
           header={header}
-          body={body}
+          body={bodys}
           actions={actions}
           metaData={metaInformation}
           actionEmitter={actionEmitter}
+          // inputAudio={inputAudio}
         />
       </div>
-      {loader && <AudioLoader />}
+      {loader && <AudioLoader/>
+      // <div className="audio-loader">
+      //       <div className='loader-container'>
+      // <CircularProgressWithLabel value={loader ? progress : 100} />
+      // </div>
+      //   </div>
+        }
 
       <Dialog
         fullWidth
@@ -839,32 +1022,6 @@ function ListingScreen() {
               />
               <div className="flexProperties" style={{ justifyContent: "end" }}>
                 <div className="flexProperties modal_text">
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={fileMetData?.fileName}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      autoFocus
-                      style={{
-                        border: "none",
-                        outline: "none",
-                        backgroundColor: "transparent",
-                        color: "#000",
-                      }}
-                    />
-                  ) : (
-                    <span
-                      onDoubleClick={handleFileNameClick}
-                      style={{ cursor: "pointer" }}
-                    >
-                      {fileMetData?.fileName}
-                    </span>
-                  )}
-                  <span>
-                    Duration:{" "}
-                    {audioTime ? formatTime(audioTime) : fileMetData?.duration}
-                  </span>
                 </div>
               </div>
               <div
@@ -916,7 +1073,7 @@ function ListingScreen() {
           )}
         </DialogContent>
         <DialogActions>
-          {dailogActions ? (
+          {/* {dailogActions ? (
             <>
               <Button
                 variant="contained"
@@ -931,7 +1088,8 @@ function ListingScreen() {
                 Save
               </Button>
             </>
-          ) : (
+          ) : 
+          ( */}
             <Button
               variant="contained"
               sx={{ backgroundColor: "#303030" }}
@@ -941,7 +1099,7 @@ function ListingScreen() {
             >
               Close
             </Button>
-          )}
+          {/* // )} */}
         </DialogActions>
       </Dialog>
 
@@ -980,7 +1138,7 @@ function ListingScreen() {
         </dailogActions>
       </Dialog> */}
       
-      <Modal
+      {/* <Modal
         open={inputPlayerModal}
         onClose={handleInputModalClose}
         aria-labelledby="modal-modal-title"
@@ -1014,17 +1172,14 @@ function ListingScreen() {
           />
           <div
             style={{
-              // backgroundColor: '#fff',
               border: "0px solid #ccc",
               width: "40%",
 
               padding: "20px",
               borderRadius: "8px",
-              // boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-              // position: 'relative' // Add position relative for positioning the close button
+          
             }}
           >
-            {/* <iconify-icon ></iconify-icon> */}
 
             <audio
               src={inputPlayerURL}
@@ -1038,9 +1193,64 @@ function ListingScreen() {
             />
           </div>
         </div>
-      </Modal>
-    
-<Dialog
+      </Modal> */}
+      {/* <Modal
+        open={outputPlayerModal}
+        onClose={handleOutputModalClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100vh",
+            width: "100vw",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 1000,
+          }}
+        >
+          <Icon
+            icon="icon-park-solid:close-one"
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "10px",
+              cursor: "pointer",
+              fontSize: "24px", // Adjust icon size
+              color: "#fff", // Change color as needed
+            }}
+            onClick={handleOutputModalClose} // Close the modal when clicked
+          />
+          <div
+            style={{
+              border: "0px solid #ccc",
+              width: "40%",
+
+              padding: "20px",
+              borderRadius: "8px",
+
+            }}
+          >
+
+            <audio
+              src={outputPlayerURL}
+              controls
+              style={{
+                backgroundColor: "transparent",
+                height: "50px",
+                width: "100%",
+                outline: "none",
+              }}
+            />
+          </div>
+        </div>
+      </Modal> */}
+    {/* <Dialog
       fullWidth
       maxWidth={false}
       open={logoutDailog}
@@ -1060,7 +1270,25 @@ function ListingScreen() {
           Yes
         </Button>
       </DialogActions>
-    </Dialog>
+    </Dialog> */}
+     <ConfirmationDialog
+      open={logoutDailog} 
+      dialogTitle="Confirm Logout"
+      dialogMessage=" Are you sure you want to log out?"
+      cancelButtonText="No"
+      confirmButtonText="Yes"
+      handleCancel={handleCancellogout}
+      handleConfirm={handleConfirmlogout}
+     />
+      <ConfirmationDialog
+      open={deleteConfirm} 
+      // dialogTitle="Confirm Logout"
+      dialogMessage=" Are you sure you want to Delete?"
+      cancelButtonText="No"
+      confirmButtonText="Yes"
+      handleCancel={handleDeleteCancel}
+      handleConfirm={handleDeleteConfirm}
+     />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { Icon } from "@iconify/react";
 
 import images from './../assets/images/logo.png'
 import facebookIcon from './../assets/images/facebook.png'
+import { BASEURL } from "./BaseURL";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -26,12 +27,12 @@ const Login = () => {
 
       const response = await loginAPI(user);
       if (response?.stored_data?.user_id) {
-        navigate("/home");
         const encryptedData = CryptoJS.AES.encrypt(
           JSON.stringify(response?.stored_data),
           secureKey
         ).toString();
         localStorage.setItem("user", encryptedData);
+        navigate("/home");
       }
     } catch (error) {
       console.error("Error during login:", error);
@@ -41,7 +42,7 @@ const Login = () => {
   const loginAPI = async (payload) => {
     try {
       const response = await axios.post(
-        "http://192.168.1.81:5050/store_user",
+        BASEURL + "store_user",
         payload,
         {
           headers: {
