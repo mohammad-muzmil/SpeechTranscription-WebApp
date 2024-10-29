@@ -264,8 +264,10 @@ const AudioRecorder = ({
           ) : (
             <div
             style={{
-              position:'absolute',
-              bottom:'58%'
+              display:'flex',
+              justifyContent:'center',
+              alignItems:'center',
+              paddingTop:50
             }}
             >
             <Icon

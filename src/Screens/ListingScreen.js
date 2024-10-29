@@ -64,6 +64,7 @@ function ListingScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [audioTime, setAudioTime] = useState(null);
   const [dailogActions, setDailogActions] = useState(true);
+  const [downloadLoad,setDownloadLoad ] = useState(false);
   const handleToggle = (option) => {
     setActive(option);
   };
@@ -228,6 +229,7 @@ let inputAudio;
 let outputAudio;
   const handleDownload = async (dataInput) => {
     try {
+      setDownloadLoad(true)
       const zip = new JSZip();
 
       // Add text content
@@ -256,6 +258,9 @@ let outputAudio;
       });
     } catch (error) {
       console.error(error);
+    }
+    finally{
+      setDownloadLoad(false);
     }
   };
   let previousAudioUrl = null;
@@ -980,14 +985,8 @@ let outputAudio;
           // inputAudio={inputAudio}
         />
       </div>
-      {loader && <AudioLoader/>
-      // <div className="audio-loader">
-      //       <div className='loader-container'>
-      // <CircularProgressWithLabel value={loader ? progress : 100} />
-      // </div>
-      //   </div>
-        }
-
+      {loader && <AudioLoader/>}
+      {downloadLoad && <AudioLoader/>}
       <Dialog
         fullWidth
         maxWidth={false}
