@@ -7,7 +7,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Icon } from "@iconify/react";
-import { Box, Tooltip } from "@mui/material";
+import { Box, CircularProgress, Tooltip } from "@mui/material";
 import { BASEURL } from "./BaseURL";
 
 const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
@@ -16,8 +16,12 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
     input: {},
     output: {},
   });
-
+  const [loadingState, setLoadingState] = useState({});
   const inputAudio = async (url, id) => {
+    const cellKey = `${id}_input`;
+
+  // Set loading state for the specific cell
+  setLoadingState((prev) => ({ ...prev, [cellKey]: true }));
     try {
       const response = await fetch(
         BASEURL +"temp_url?fileName=" + url
@@ -33,10 +37,17 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
     } catch (error) {
       console.error("Error fetching input audio URL:", error);
     }
+    finally{
+      setLoadingState((prev) => ({ ...prev, [cellKey]: false }));
+    }
   };
 
   const outputAudio = async (url, id) => {
     // Similar logic for output audio
+    const cellKey = `${id}_output`;
+
+    // Set loading state for the specific cell
+    setLoadingState((prev) => ({ ...prev, [cellKey]: true }));
     try {
       const response = await fetch(
          BASEURL +"temp_url?fileName=" + url
@@ -51,6 +62,9 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
       }));
     } catch (error) {
       console.error("Error fetching output audio URL:", error);
+    }
+    finally{
+      setLoadingState((prev) => ({ ...prev, [cellKey]: false }));
     }
   };
 
@@ -259,6 +273,11 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                                   element.
                                 </audio>
                               ) : (
+                                (column?.key === "inputFile" && loadingState[`${index}_input`]) || 
+                                (column?.key === "outputFile" && loadingState[`${index}_output`])
+                              ) ? (
+                                <CircularProgress size={24} />
+                              ) : (
                                 <Icon
                                   icon={column?.hasIcon?.icon_name}
                                   style={{
@@ -267,7 +286,9 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                                   }}
                                   cursor="pointer"
                                 />
-                              )}
+                              )
+                              
+                              }
                             </p>
                           )}
                         </div>

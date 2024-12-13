@@ -29,7 +29,7 @@
     flex-direction: column;
     justify-content: flex-start;
     /* Align the logo and text to the top */
-    padding: 40px;
+    /* padding: 40px; */
     padding-left: 7rem;
     box-sizing: border-box;
 
@@ -63,7 +63,7 @@
     font-size: 13px;
     font-weight: 400;
     color: #0000007d;
-    width: 40rem;
+    /* width: 40rem; */
     /* line-height: 45.56px; */
 }
 
