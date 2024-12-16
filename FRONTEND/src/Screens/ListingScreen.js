@@ -439,7 +439,7 @@ let outputAudio;
           ...prev,
           generated_speech_url: respData?.play_url,
         }));
-  
+        metaDataApi()
         setNewBodyItem({
           inputFile: fileName,
           fileType: newAudioFile.type,
@@ -519,11 +519,11 @@ let outputAudio;
     }
   }, [transcriptionProcessData?.user_id, metaData]); // Include dependencies
 
-  useEffect(() => {
-    if (active) { // Check if active is true before calling the API
-      metaDataApi();
-    }
-  }, [metaDataApi, active]);
+  // useEffect(() => {
+  //   if (active) { // Check if active is true before calling the API
+  //     metaDataApi();
+  //   }
+  // }, [metaDataApi, active]);
 
 
 

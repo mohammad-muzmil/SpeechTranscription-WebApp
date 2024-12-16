@@ -74,7 +74,7 @@ const Login = () => {
 
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
 
-          <div style={{ marginTop: '10rem' }}>
+          <div style={{ marginTop: '1rem' }}>
 
 
             <div className={styles.welcomeText}>Hello, Welcome to</div>
