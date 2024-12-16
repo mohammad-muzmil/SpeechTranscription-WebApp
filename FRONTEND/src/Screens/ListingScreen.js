@@ -6,6 +6,7 @@ import BasicTable from "../ReusableComponents/BasicTable";
 import { Icon } from "@iconify/react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  Autocomplete,
   Avatar,
   Box,
   Button,
@@ -16,6 +17,7 @@ import {
   DialogTitle,
   Modal,
   Popover,
+  TextField,
   Typography,
 } from "@mui/material";
 import AudioRecorder from "../ReusableComponents/AudioRecorder";
@@ -34,6 +36,7 @@ import { auth, provider } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { ConfirmationDialog } from "../ReusableComponents/ConfirmationDialog";
 import { BASEURL } from "../ReusableComponents/BaseURL";
+import { PhraseUploadDialog } from "../ReusableComponents/PhraseUploadDialog";
 
 function ListingScreen() {
   const APIURL = window?.location.hostname;
@@ -41,34 +44,49 @@ function ListingScreen() {
   const CryptoJS = require("crypto-js");
   const navigate = useNavigate();
   const secureKey = process.env.REACT_APP_SECURE_KEY;
-  const [respDatastate, setrespDatastate] =useState(null)
+  const [respDatastate, setrespDatastate] = useState(null);
   const [active, setActive] = useState("upload");
   const [isRecording, setIsRecording] = useState(false);
-  const [metaData , setMetaData]= useState(null);
+  const [metaData, setMetaData] = useState(null);
   // const [showDialog, setShowDialog] = useState(false);
-  const [bodys,setBodys] = useState([]);
+  const [bodys, setBodys] = useState([]);
   const [file, setFile] = useState(null);
+  const [pharseFile, setPharseFile] = useState(null);
   const [fileMetData, setFileMetaData] = useState({});
   const [loader, setLoader] = useState(false);
   // const [inputPlayerModal, setInputPlayerModal] = useState(false);
   // const [outputPlayerModal, setOutputPlayerModal] = useState(false);
   // const [inputPlayerURL, setInputPlayerURL] = useState("");
   // const [outputPlayerURL, setOutputPlayerURL] = useState("");
-  const [transcriptionProcessData, setTranscriptionProcessData] = useState(null);
+  const [transcriptionProcessData, setTranscriptionProcessData] =
+    useState(null);
   const [newBodyItem, setNewBodyItem] = useState({});
   const [open, setOpen] = useState(false);
   const [logoutDailog, setLogoutDailog] = useState(false);
-  const [deleteConfirm , setDeleteConfirm] = useState(false);
-  const [deletePayload,setDeletePayload] = useState(null);
+  const [showPhraseUploadDialog, setShowPhraseUploadDialog] = useState(false);
+  const [phraseTextOpen, setPhraseTextOpen] = useState(false);
+  const [showUploadScreen, setShowUploadScreen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deletePayload, setDeletePayload] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [audioTime, setAudioTime] = useState(null);
   const [dailogActions, setDailogActions] = useState(true);
-  const [downloadLoad,setDownloadLoad ] = useState(false);
+  const [downloadLoad, setDownloadLoad] = useState(false);
+
   const handleToggle = (option) => {
     setActive(option);
   };
 
+  const modelOptions = [
+    {
+      name: "whisper-small",
+    },
+    {
+      name: "whisper-small-finetuned-on-m01",
+    },
+  ];
+  const [model, setModel] = useState(modelOptions[0]?.name);
   const currentAudioRef = useRef(null);
   const handleAudioPlay = (event) => {
     // If there's already an audio playing, pause it
@@ -86,37 +104,32 @@ function ListingScreen() {
   function CircularProgressWithLabel(props) {
     return (
       <Box
-  sx={{
-    position: 'fixed', // Use 'fixed' to center it in the viewport
-    top: '50%',        // Move down 50% of the viewport height
-    left: '50%',       // Move right 50% of the viewport width
-    transform: 'translate(-50%, -50%)', // Adjust back by half its own size
-    display: 'inline-flex',
-  }}
->
-  <CircularProgress variant="determinate" {...props}  size={100}/>
-  <Box
-    sx={{
-      top: 0,
-      left: 0,
-      bottom: 0,
-      right: 0,
-      position: 'absolute',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}
-  >
-    <Typography
-     variant="h6"
-      component="div"
-      sx={{ color: 'black' }}
-    >
-      {`${Math.round(props.value)}%`}
-    </Typography>
-  </Box>
-</Box>
-
+        sx={{
+          position: "fixed", // Use 'fixed' to center it in the viewport
+          top: "50%", // Move down 50% of the viewport height
+          left: "50%", // Move right 50% of the viewport width
+          transform: "translate(-50%, -50%)", // Adjust back by half its own size
+          display: "inline-flex",
+        }}
+      >
+        <CircularProgress variant="determinate" {...props} size={100} />
+        <Box
+          sx={{
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            position: "absolute",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Typography variant="h6" component="div" sx={{ color: "black" }}>
+            {`${Math.round(props.value)}%`}
+          </Typography>
+        </Box>
+      </Box>
     );
   }
 
@@ -170,12 +183,18 @@ function ListingScreen() {
       //   setShowDialog(true);
       // } else {
       // }
-      handleSubmit(file);
-      setFile(file);
+      // handleSubmit(file);
+      if (!showUploadScreen) {
+        setFile(file);
+        //  setPhraseTextOpen(false)
+      } else {
+        setPharseFile(file);
+      }
     } else {
       alert("File size exceeds the limit of 50MB");
     }
   };
+  console.log(file, "file");
 
   const handleDrop = (event) => {
     event.preventDefault();
@@ -193,7 +212,7 @@ function ListingScreen() {
   //     if (!file) document.getElementById("fileInput").click(); // Trigger file input click
   //   }
   // };
-  const handleFileInputChange = (event) => {
+  const handleFileInputChange = (event, type) => {
     const files = event.target.files;
     if (files.length > 0) {
       handleFile(files[0]);
@@ -214,32 +233,30 @@ function ListingScreen() {
     },
   };
 
-
   const fetchData = async () => {
     try {
       const data = await getData("get_user_records/" + userDetails?.user_id);
-      setBodys(data?.user_records
-      );
+      setBodys(data?.user_records);
     } catch (error) {
       console.error("Error fetching user records:", error);
     }
   };
 
-let inputAudio;
-let outputAudio;
+  let inputAudio;
+  let outputAudio;
   const handleDownload = async (dataInput) => {
     try {
-      setDownloadLoad(true)
+      setDownloadLoad(true);
       const zip = new JSZip();
 
       // Add text content
       const textContent = dataInput?.Transcription;
       zip.file("transcription.txt", textContent);
-       inputAudio = await getData('temp_url?fileName=' + dataInput?.inputFile);
-       outputAudio = await getData('temp_url?fileName=' + dataInput?.outputFile);
+      inputAudio = await getData("temp_url?fileName=" + dataInput?.inputFile);
+      outputAudio = await getData("temp_url?fileName=" + dataInput?.outputFile);
 
       // Add audio files (Assuming the audio files are in the `public` folder or URLs)
-      
+
       const audio1Url = inputAudio?.temp_URL; // Replace with your actual path
       const audio2Url = outputAudio?.temp_URL; // Replace with your actual path
 
@@ -258,8 +275,7 @@ let outputAudio;
       });
     } catch (error) {
       console.error(error);
-    }
-    finally{
+    } finally {
       setDownloadLoad(false);
     }
   };
@@ -300,15 +316,11 @@ let outputAudio;
   }
   const loginAPI = async (payload) => {
     try {
-      const response = await axios.post(
-        BASEURL + `store_user`,
-        payload,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.post(BASEURL + `store_user`, payload, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       return response.data;
     } catch (error) {
       console.error("Error during API call:", error);
@@ -345,49 +357,92 @@ let outputAudio;
   const handleClosePopover = () => {
     setOpenDialog(false);
   };
-  const handleConfirmlogout = ()=>{
-    handleLogout()
-    setLogoutDailog(false)
-  }
-  const handleCancellogout = () =>{
-    setLogoutDailog(false)
-  }
-  const handleOpenlogout = () =>{
-    setLogoutDailog(true)
-  }
-  const handleLogout = async() => {
+  const handleConfirmlogout = () => {
+    handleLogout();
+    setLogoutDailog(false);
+  };
+  const handleCancellogout = () => {
+    setLogoutDailog(false);
+  };
+  const handleOpenlogout = () => {
+    setLogoutDailog(true);
+  };
+  const handleLogout = async () => {
     await signOut(auth);
     localStorage.clear();
-    navigate("/")
+    navigate("/");
+  };
+
+  const handlePhraseText = (val) => {
+    if (val === "Confirm") {
+      setShowPhraseUploadDialog(true); // Open phrase text upload dialog
+    } else {
+      // Skip phrase text upload and process audio file directly
+      processAudioUpload(file, null);
+    }
+    setPhraseTextOpen(false); // Close the confirmation dialog
+  };
+
+  const handlePhraseTextUpload = (pharseFile) => {
+    if (pharseFile) {
+      processAudioUpload(file, pharseFile); // Call API with both audio and phrase file
+      setShowPhraseUploadDialog(false); // Close upload dialog
+    } else {
+      alert("Please upload a phrase text file."); // Ensure a file is uploaded
+    }
+  };
+  
+  // Allow user to cancel the phrase text upload even after pressing "Yes"
+  const cancelPhraseTextUpload = () => {
+    setShowPhraseUploadDialog(false); // Close the dialog
+    setPharseFile(null); // Clear uploaded phrase file
+    processAudioUpload(file, null); // Proceed with audio upload only
+  };
+  
+  // Handle file input for phrase text
+  const handlePhraseFileInput = (event) => {
+    const files = event.target.files;
+    if (files.length > 0) {
+      setPharseFile(files[0]);
+    }
   };
 
   useEffect(() => {
     if (userDetails?.user_id) {
       fetchData();
     }
-  }, [])
+  }, []);
+  useEffect(() => {
+    if (file && active==="upload") {
+      setPhraseTextOpen(true);
+    }
+  }, [file]);
   let fileName;
   let duration;
   let newAudioFile;
   let respData;
-  const processAudioUpload = async (audioFile) => {
+
+  const processAudioUpload = async (audioFile, phraseFile) => {
     newAudioFile = audioFile?.recordedURL ? audioFile.recordedURL : audioFile;
-  
-   
+
     if (audioFile?.recordedURL) {
-      const audio1Blob = await fetch(audioFile?.recordedURL).then((res) => res.blob());
+      const audio1Blob = await fetch(audioFile?.recordedURL).then((res) =>
+        res.blob()
+      );
       newAudioFile = audio1Blob;
       setFile(audio1Blob);
     }
-  
+
     // Set the file name based on the input
-    fileName = audioFile?.fileName ? audioFile.fileName : "NewFile_" + new Date().getTime();
-  
+    fileName = audioFile?.fileName
+      ? audioFile.fileName
+      : "NewFile_" + new Date().getTime();
+
     const audio = new Audio(URL.createObjectURL(newAudioFile));
     audio.onloadedmetadata = () => {
       duration = Math.floor(audio.duration); // Get the duration in seconds
     };
-  
+
     // Wait for audio metadata to load
     await new Promise((resolve) => {
       audio.onloadedmetadata = () => {
@@ -395,55 +450,59 @@ let outputAudio;
         resolve();
       };
     });
-  
-    
 
     const formData = new FormData();
+    if (phraseFile) {
+      formData.append("phrase_text", phraseFile); // Add the phrase text file
+    }
     formData.append("audio", newAudioFile);
     formData.append("type", "input");
     formData.append("user_id", userDetails?.user_id);
+    formData.append("model", model);
     try {
       setLoader(true);
-      const response = await axios.post(
-        BASEURL + `process_audio`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-       respData = { ...response?.data };
+      const response = await axios.post(BASEURL + `process_audio`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      respData = { ...response?.data };
 
-  
       if (respData?.generated_speech_url) {
-        respData['play'] = respData?.generated_speech_url;
-        const response = await getData('temp_url?fileName=' + respData?.generated_speech_url);
-        respData['play_url'] = response.temp_URL;
+        respData["play"] = respData?.generated_speech_url;
+        const response = await getData(
+          "temp_url?fileName=" + respData?.generated_speech_url
+        );
+        respData["play_url"] = response.temp_URL;
       }
-  
-      if (respData?.input_audio_url) {
-        respData['inputFile'] = respData?.input_audio_url;
-        const response = await getData('temp_url?fileName=' + respData?.input_audio_url);
-        respData['inputFile_url'] = response.temp_URL;
-  
 
+      if (respData?.input_audio_url) {
+        respData["inputFile"] = respData?.input_audio_url;
+        const response = await getData(
+          "temp_url?fileName=" + respData?.input_audio_url
+        );
+        respData["inputFile_url"] = response.temp_URL;
       }
- 
-      setMetaData({newAudioFile:newAudioFile?.type,duration:audioTime ? formatTime(audioTime):formatTime(duration),fileName:fileName})
+
+      setMetaData({
+        newAudioFile: newAudioFile?.type,
+        duration: audioTime ? formatTime(audioTime) : formatTime(duration),
+        fileName: fileName,
+      });
       setrespDatastate(respData);
       if (respData?.generated_speech_url) {
         setTranscriptionProcessData(respData);
-        
+
         setTranscriptionProcessData((prev) => ({
           ...prev,
           generated_speech_url: respData?.play_url,
         }));
-        metaDataApi()
+        metaDataApi();
         setNewBodyItem({
           inputFile: fileName,
           fileType: newAudioFile.type,
-          Transcription: response.data.transcription || "Transcription not available",
+          Transcription:
+            response.data.transcription || "Transcription not available",
           duration: formatTime(duration) || "-",
           dateAndtime: new Date().toLocaleString(),
           outputFile: respData?.play,
@@ -485,10 +544,9 @@ let outputAudio;
                 },
               },
         });
-  
+
         // handleOpen("View");
         setIsRecording(false);
-       
       }
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -507,12 +565,9 @@ let outputAudio;
       Transcription: transcriptionProcessData?.transcription,
       user_id: transcriptionProcessData?.user_id,
     };
-    
+
     try {
-      const response = await axios.post(
-        BASEURL + 'save_metadata',
-        payload,
-      );
+      const response = await axios.post(BASEURL + "save_metadata", payload);
       fetchData(); // Ensure fetchData is defined in your component
     } catch (error) {
       console.error(error);
@@ -525,23 +580,20 @@ let outputAudio;
   //   }
   // }, [metaDataApi, active]);
 
-
-
   const getData = async (url) => {
     try {
-      const response = await axios.get( BASEURL + url);
+      const response = await axios.get(BASEURL + url);
       return response.data; // Return the data from the response
     } catch (error) {
-      console.error('Error posting data:', error);
+      console.error("Error posting data:", error);
       throw error; // Rethrow the error for further handling
     }
   };
-  const handleOutputAudio = async()=>{
+  const handleOutputAudio = async () => {
     // console.log(transcriptionProcessData,"transcriptionProcessData");
-    
     // const res  = await getData('temp_url?fileName=' + transcriptionProcessData?.inputFile)
     // return res?.temp_URL;
-  }
+  };
   const handleSubmit = async (audioFile) => {
     // event.preventDefault();
 
@@ -557,40 +609,39 @@ let outputAudio;
       setFile(audio1Blob);
     }
     if (newAudioFile) {
-      await processAudioUpload(newAudioFile); // Proceed with the upload if user is logged in
+       await processAudioUpload(newAudioFile); // Proceed with the upload if user is logged in
     } else {
       alert("Please select an audio file");
     }
   };
-  const disguardApi = async()=>{
+  const disguardApi = async () => {
     const payload = {
-      files:[transcriptionProcessData?.inputFile , transcriptionProcessData?.play]
-    }
-    const res = await axios.post(BASEURL +"remove_audio_s3",payload)
+      files: [
+        transcriptionProcessData?.inputFile,
+        transcriptionProcessData?.play,
+      ],
+    };
+    const res = await axios.post(BASEURL + "remove_audio_s3", payload);
     fetchData();
-  }
-  const handleDeleteCancel = ()=>{
+  };
+  const handleDeleteCancel = () => {
     setDeleteConfirm(false);
-
-  }
-  const handleDelete =(payload)=>{
+  };
+  const handleDelete = (payload) => {
     deleteApi(payload);
     setDeleteConfirm(false);
-  }
-  const handleDeleteConfirm = ()=>{
+  };
+  const handleDeleteConfirm = () => {
     // setDeletePayload(true)
-    handleDelete(deletePayload)
-    
-  }
-  const deleteApi = async(payload)=>{
-    
-    const res = await axios.post( BASEURL +"remove_record",payload)
+    handleDelete(deletePayload);
+  };
+  const deleteApi = async (payload) => {
+    const res = await axios.post(BASEURL + "remove_record", payload);
     fetchData();
-  }
+  };
   const handleClose = (type) => {
     setOpen(!open);
-    if(type==="clear")
-      disguardApi();
+    if (type === "clear") disguardApi();
   };
 
   // const handleInputModalClose = () => {
@@ -604,9 +655,8 @@ let outputAudio;
     if (type === "View") {
       setDailogActions(true);
     }
-
   };
-  const { header,body, actions } = useSelector((state) => state.data);
+  const { header, body, actions } = useSelector((state) => state.data);
   const dispatch = useDispatch();
 
   const handleFileNameClick = () => {
@@ -624,45 +674,48 @@ let outputAudio;
     // setFileName(e.target.value);
   };
 
-  const actionEmitter = async(e) => {
+  const actionEmitter = async (e) => {
     if (e?.action?.key === "download") {
-      
       handleDownload(e?.item);
     } else if (e?.action?.key === "delete") {
       // handleDownload(e?.item)
       // deleteApi(e?.item)
-      
+
       setDeleteConfirm(true);
       setDeletePayload(e?.item);
       // console.log(e?.item,"muzz");
-      
+
       // dispatch(removeBodyItem(e?.item));
-    } 
+    }
     // else if (e?.action?.type === "input") {
-    
-      // inputAudio()
-      // setInputPlayerModal(true);
-      // console.log(e?.data,"rammmmmm");
-      
-      // open a modal to play input value
-    // } 
+
+    // inputAudio()
+    // setInputPlayerModal(true);
+    // console.log(e?.data,"rammmmmm");
+
+    // open a modal to play input value
+    // }
     // else if (e?.action?.type === "output") {
     //   setOutputPlayerModal(true);
     //   async function call (){
 
     //     const output_audio_url = await getData('http://192.168.1.81:5050/temp_url?fileName=' + e?.data?.outputFile)
-    //      setOutputPlayerURL(output_audio_url?.temp_URL);      
+    //      setOutputPlayerURL(output_audio_url?.temp_URL);
     //   }
     //   call()
     //   // open a modal to play input value
     //   // console.log(e?.data,"rammmmmm");
-    // } 
+    // }
     else if (e?.action?.type === "openModel") {
       let input_audio_url;
       let output_audio_url;
-      
-      input_audio_url = await getData('temp_url?fileName=' + e?.data?.inputFile)
-      output_audio_url = await getData('temp_url?fileName=' + e?.data?.outputFile)
+
+      input_audio_url = await getData(
+        "temp_url?fileName=" + e?.data?.inputFile
+      );
+      output_audio_url = await getData(
+        "temp_url?fileName=" + e?.data?.outputFile
+      );
       setDailogActions(false);
       setTranscriptionProcessData({
         transcription: e?.data?.Transcription,
@@ -671,24 +724,72 @@ let outputAudio;
         duration: e?.data?.duration,
         fileName: e?.data?.inputFile,
       });
-      
+
       setFileMetaData({
         fileName: e?.data?.inputFile,
         duration: e?.data?.duration,
       });
       setFile(null);
       handleOpen();
-      
     }
   };
-
+  const PhraseTextDialog = () => {
+    const handleFileUpload = async (event) => {
+      const file = event.target.files[0];
+      setPharseFile(file)
+      if (file) {
+        try {
+          await handlePhraseTextUpload(file); // Call the API with the file directly
+        } catch (error) {
+          console.error("Error uploading phrase text file:", error);
+        }
+      }
+    };
+  
+    return (
+      <PhraseUploadDialog
+        open={showPhraseUploadDialog}
+        dialogTitle="Upload Phrase Text"
+        dialogMessage="Please upload your phrase text file."
+        handleClose={cancelPhraseTextUpload} // Handle the "X" button
+        uploadContent={
+          <>
+            <div className="flex-center">
+              <Icon
+                icon="solar:cloud-upload-outline"
+                style={{ fontSize: "65px", color: "#0560FD" }}
+              />
+            </div>
+            <div className="flex-center">
+              <label
+                className="browseButtonStyle"
+                htmlFor="phraseFileInput"
+                style={{ cursor: "pointer" }}
+              >
+                Browse Phrase Text
+              </label>
+              <input
+                id="phraseFileInput"
+                type="file"
+                onChange={handleFileUpload} // Handle upload directly
+                style={{ display: "none" }}
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
+              />
+            </div>
+          </>
+        }
+      />
+    );
+  };
+  
+  
+  
   return (
     <div className="container">
       <div className="top-section">
-        
         <div className="flex-properties-corner">
-        <img src={logo} alt="Logo" className="logo" />
-        {/* <Avatar 
+          <img src={logo} alt="Logo" className="logo" />
+          {/* <Avatar 
         src={logo} 
         alt={"User Avatar"}
         sx={{
@@ -702,31 +803,31 @@ let outputAudio;
             Speech Transcription and Real-Time Processing
           </p>
 
-        <Avatar
-              src={userDetails?.photoURL}
-              alt={userDetails?.displayName || "User Avatar"}
-              onClick={() => handleOptions()}
-              sx={{
-                width: 45,
-                height: 45,
-                cursor: "pointer",
-                marginTop: "7px",
-              }}
-            />
-  <Popover
-  open={openDialog}
-  anchorOrigin={{
-    vertical: 'top',
-    horizontal: 'right',
-  }}
-  transformOrigin={{
-    vertical: 'top',
-    horizontal: 'bottom',
-  }}
-  onClose={handleClosePopover}
->
-  {/* Cancel Icon */}
-  {/* <div
+          <Avatar
+            src={userDetails?.photoURL}
+            alt={userDetails?.displayName || "User Avatar"}
+            onClick={() => handleOptions()}
+            sx={{
+              width: 45,
+              height: 45,
+              cursor: "pointer",
+              marginTop: "7px",
+            }}
+          />
+          <Popover
+            open={openDialog}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "bottom",
+            }}
+            onClose={handleClosePopover}
+          >
+            {/* Cancel Icon */}
+            {/* <div
     style={{ width: "100%", display: "flex", justifyContent: "flex-end" }}
   >
     <Icon
@@ -744,40 +845,40 @@ let outputAudio;
     />
   </div> */}
 
-  {/* Content Section */}
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center", // Center content vertically
-      textAlign: "center", // Center text
-      padding: "16px", // Add padding for better spacing
-    }}
-  >
-    <Avatar
-      src={userDetails?.photoURL}
-      alt={userDetails?.displayName || "User Avatar"}
-      sx={{ width: 60, height: 60}}
-    />
-    <Typography variant="body1" sx={{ marginTop: 2 }}>
-      {userDetails?.email}
-    </Typography>
+            {/* Content Section */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center", // Center content vertically
+                textAlign: "center", // Center text
+                padding: "16px", // Add padding for better spacing
+              }}
+            >
+              <Avatar
+                src={userDetails?.photoURL}
+                alt={userDetails?.displayName || "User Avatar"}
+                sx={{ width: 60, height: 60 }}
+              />
+              <Typography variant="body1" sx={{ marginTop: 2 }}>
+                {userDetails?.email}
+              </Typography>
 
-    {/* Logout Button */}
-    <Button
-      // size="small"
-      variant="contained"
-      color="error"
-      onClick={handleOpenlogout}
-      sx={{ marginTop: 2 ,textTransform:"none"}} // Space above the button
-    >
-      Logout
-    </Button>
-  </div>
-</Popover>
+              {/* Logout Button */}
+              <Button
+                // size="small"
+                variant="contained"
+                color="error"
+                onClick={handleOpenlogout}
+                sx={{ marginTop: 2, textTransform: "none" }} // Space above the button
+              >
+                Logout
+              </Button>
+            </div>
+          </Popover>
         </div>
-   
+
         <div className="headerContent">
           {/* <p className="headerTitle">
             Speech Transcription and Real-Time Processing
@@ -785,6 +886,17 @@ let outputAudio;
           <div className="centerRuler"></div>
 
           <div className="recordSectionContainer">
+            <div style={{ width: "60%" }}>
+              <Autocomplete
+                options={modelOptions.map((option) => option.name)} // Extract names
+                value={model}
+                onChange={(event, value) => setModel(value)} // Get the selected value
+                renderInput={(params) => (
+                  <TextField {...params} label="Select Model" />
+                )}
+                disableClearable
+              />
+            </div>
             <div className="childSection">
               <p className="headerSubTitle">What would you like to do?</p>
 
@@ -850,59 +962,57 @@ let outputAudio;
             <div className="childSection uploadSection">
               {active === "upload" ? (
                 // Your component or JSX for the "upload" condition
+                <>
                 <div
-                  onDragEnter={preventDefaults}
-                  onDragLeave={preventDefaults}
-                  onDragOver={preventDefaults}
-                  onDrop={handleDrop}
-                  className="dropzone"
-                >
-                  <span style={{ textAlign: "center" }}>
-                    <div className="uploadIconHolder">
-                      <Icon
-                        icon="solar:cloud-upload-outline"
-                        style={{ fontSize: "65px", color: "#0560FD" }}
-                      />
-                    </div>
-
-                    <div className="uploaderContentSection">
-                      Drag & drop files or{" "}
-                      <label
-                        className="browseButtonStyle"
-                        htmlFor="fileInput"
-                        // onClick={handleFileUploadClick}
-                        style={{ cursor: "pointer" }}
-                      >
-                        Browse
-                      </label>
-                      <input
-                        id="fileInput"
-                        type="file"
-                        onChange={handleFileInputChange}
-                        style={{ display: "none" }} // Hide the file input
-                        accept=".wav,.mp3,.m4a,.mp4"
-                      />
-                    </div>
-
-                    <span className="uploaderMutedText">
-                      Limit 200mb per file. Supported formats: .wav, .mp3, .m4a,
-                      .mp4
-                    </span>
+                onDragEnter={preventDefaults}
+                onDragLeave={preventDefaults}
+                onDragOver={preventDefaults}
+                onDrop={handleDrop}
+                className="dropzone"
+              >
+                <span style={{ textAlign: "center" }}>
+                  <div className="uploadIconHolder">
+                    <Icon
+                      icon="solar:cloud-upload-outline"
+                      style={{ fontSize: "65px", color: "#0560FD" }}
+                    />
+                  </div>
+          
+                  <div className="uploaderContentSection">
+                    Drag & drop files or{" "}
+                    <label className="browseButtonStyle" htmlFor="fileInput" style={{ cursor: "pointer" }}>
+                      Browse Audio File
+                    </label>
+                    <input
+                      id="fileInput"
+                      type="file"
+                      onChange={handleFileInputChange}
+                      style={{ display: "none" }}
+                      accept=".wav,.mp3,.m4a,.mp4"
+                    />
+                  </div>
+          
+                  <span className="uploaderMutedText">
+                    Limit 50MB per file. Supported formats: .wav, .mp3, .m4a, .mp4
                   </span>
-                </div>
+                </span>
+              </div>
+          
+              {showPhraseUploadDialog && <PhraseTextDialog />}
+              </>
               ) : (
                 <>
                   {/* {isRecording ? ( */}
-                    <>
-                      <AudioRecorder
-                        handleSubmit={handleSubmit}
-                        ResetDefault={ResetDefault}
-                        getRecordTime={getRecordTime}
-                        handleOutputAudio = {handleOutputAudio}
-                        metaDataApi={metaDataApi}
-                        respData={respDatastate}
-                      />
-                    </>
+                  <>
+                    <AudioRecorder
+                      handleSubmit={handleSubmit}
+                      ResetDefault={ResetDefault}
+                      getRecordTime={getRecordTime}
+                      handleOutputAudio={handleOutputAudio}
+                      metaDataApi={metaDataApi}
+                      respData={respDatastate}
+                    />
+                  </>
                   {/* ) 
                   : (
                     <span
@@ -985,8 +1095,8 @@ let outputAudio;
           // inputAudio={inputAudio}
         />
       </div>
-      {loader && <AudioLoader/>}
-      {downloadLoad && <AudioLoader/>}
+      {loader && <AudioLoader />}
+      {downloadLoad && <AudioLoader />}
       <Dialog
         fullWidth
         maxWidth={false}
@@ -1020,8 +1130,7 @@ let outputAudio;
                 onPlay={handleAudioPlay}
               />
               <div className="flexProperties" style={{ justifyContent: "end" }}>
-                <div className="flexProperties modal_text">
-                </div>
+                <div className="flexProperties modal_text"></div>
               </div>
               <div
                 className="flexProperties"
@@ -1089,15 +1198,15 @@ let outputAudio;
             </>
           ) : 
           ( */}
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: "#303030" }}
-              onClick={() => {
-                handleClose();
-              }}
-            >
-              Close
-            </Button>
+          <Button
+            variant="contained"
+            sx={{ backgroundColor: "#303030" }}
+            onClick={() => {
+              handleClose();
+            }}
+          >
+            Close
+          </Button>
           {/* // )} */}
         </DialogActions>
       </Dialog>
@@ -1136,7 +1245,7 @@ let outputAudio;
           </div>
         </dailogActions>
       </Dialog> */}
-      
+
       {/* <Modal
         open={inputPlayerModal}
         onClose={handleInputModalClose}
@@ -1249,7 +1358,7 @@ let outputAudio;
           </div>
         </div>
       </Modal> */}
-    {/* <Dialog
+      {/* <Dialog
       fullWidth
       maxWidth={false}
       open={logoutDailog}
@@ -1270,27 +1379,34 @@ let outputAudio;
         </Button>
       </DialogActions>
     </Dialog> */}
-     <ConfirmationDialog
-      open={logoutDailog} 
-      dialogTitle="Confirm Logout"
-      dialogMessage=" Are you sure you want to log out?"
-      cancelButtonText="No"
-      confirmButtonText="Yes"
-      handleCancel={handleCancellogout}
-      handleConfirm={handleConfirmlogout}
-     />
       <ConfirmationDialog
-      open={deleteConfirm} 
-      // dialogTitle="Confirm Logout"
-      dialogMessage=" Are you sure you want to Delete?"
-      cancelButtonText="No"
-      confirmButtonText="Yes"
-      handleCancel={handleDeleteCancel}
-      handleConfirm={handleDeleteConfirm}
-     />
+        open={logoutDailog}
+        dialogTitle="Confirm Logout"
+        dialogMessage=" Are you sure you want to log out?"
+        cancelButtonText="No"
+        confirmButtonText="Yes"
+        handleCancel={handleCancellogout}
+        handleConfirm={handleConfirmlogout}
+      />
+      <ConfirmationDialog
+        open={deleteConfirm}
+        // dialogTitle="Confirm Logout"
+        dialogMessage=" Are you sure you want to Delete?"
+        cancelButtonText="No"
+        confirmButtonText="Yes"
+        handleCancel={handleDeleteCancel}
+        handleConfirm={handleDeleteConfirm}
+      />
+      <ConfirmationDialog
+        open={phraseTextOpen}
+        dialogTitle="Upload Phase Text?"
+        dialogMessage="Do you want to upload Phase Text for this file?"
+        cancelButtonText="No"
+        confirmButtonText="Yes"
+        handleCancel={() => handlePhraseText("cancel")}
+        handleConfirm={() => handlePhraseText("Confirm")}
+      />
     </div>
   );
-}
-{
 }
 export default ListingScreen;

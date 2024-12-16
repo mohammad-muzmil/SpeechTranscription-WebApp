@@ -48,14 +48,39 @@ const initialState = {
         minWidth: "70px",
       },
     },
-    {
-      key: "fileType",
-      label: "File Type",
+    // {
+    //   key: "fileType",
+    //   label: "File Type",
+    //   type: "text",
+    //   subType: "",
+    //   customHeaderStyles: {
+    //     minWidth: "70px",
+    //   },
+    // },
+     {
+      key: "phraseText",
+      label: "Phrase Text",
       type: "text",
       subType: "",
       customHeaderStyles: {
-        minWidth: "70px",
+        minWidth: "100px",
       },
+      hasIcon: {
+        alignment: "right",
+        icon_name: "quill:link-out",
+        input_file_url: "",
+        tooltip: "Click to see Full Transcription",
+        styles: {
+          // backgroundColor: "#5A97FF",
+          fontSize: 17,
+          // padding: 0,
+          // margin: 0,
+          // position: "absolute",
+
+          // borderRadius: 50,
+          color: "#0560FD",
+        },
+      }
     },
     {
       key: "Transcription",
@@ -122,10 +147,19 @@ const initialState = {
         minWidth: "150px",
       },
     },
+    // {
+    //   key: "dateAndtime",
+    //   label: "Date & Time",
+    //   type: "dateAndtime",
+    //   subType: "",
+    //   customHeaderStyles: {
+    //     minWidth: "100px",
+    //   },
+    // },
     {
-      key: "dateAndtime",
-      label: "Date & Time",
-      type: "dateAndtime",
+      key: "accuracy",
+      label: "Word Accuracy",
+      type: "text",
       subType: "",
       customHeaderStyles: {
         minWidth: "100px",
