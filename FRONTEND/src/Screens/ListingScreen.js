@@ -1177,7 +1177,7 @@ function ListingScreen() {
                 <div className="flexProperties modal_text"></div>
               </div>
               
-             { transcriptionProcessData?.phraseText?.length>0 && <> <div
+             { transcriptionProcessData?.phraseText?.length>1 && <> <div
                 className="flexProperties"
                 style={{ justifyContent: "space-between", marginTop: "25px" }}
               >
