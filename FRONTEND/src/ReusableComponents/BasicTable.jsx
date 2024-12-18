@@ -114,11 +114,11 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow sx={{ borderBottom: "1.5px solid #BCD4FF" }}>
-            {metaData.requiredSerialNumber && (
+            {/* {metaData.requiredSerialNumber && (
               <TableCell align="center" style={headerStyles}>
                 S.No
               </TableCell>
-            )}
+            )} */}
             {header.map((column) => (
               <TableCell
                 key={column.key}
@@ -147,7 +147,7 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                 ali
                 sx={{ borderBottom: "1.5px solid #BCD4FF" }}
               >
-                {metaData?.requiredSerialNumber && (
+                {/* {metaData?.requiredSerialNumber && (
                   <TableCell
                     align="center"
                     sx={{ ...bodyStyles, textAlign: "center" }}
@@ -159,7 +159,7 @@ const BasicTable = ({ header, body, actions, metaData, actionEmitter }) => {
                         (index + 1)
                       : index + 1}
                   </TableCell>
-                )}{" "}
+                )}{" "} */}
                 {/* Use a unique identifier */}
                 {header.map((column) => (
                   <>

@@ -60,6 +60,7 @@ function ListingScreen() {
   // const [outputPlayerURL, setOutputPlayerURL] = useState("");
   const [transcriptionProcessData, setTranscriptionProcessData] =
     useState(null);
+    console.log(transcriptionProcessData,"transcriptionProcessData")
   const [newBodyItem, setNewBodyItem] = useState({});
   const [open, setOpen] = useState(false);
   const [logoutDailog, setLogoutDailog] = useState(false);
@@ -78,16 +79,42 @@ function ListingScreen() {
     setActive(option);
   };
 
-  const modelOptions = [
-    {
-      name: "whisper-small",
-    },
-    {
-      name: "whisper-small-finetuned-on-m01",
-    },
-  ];
-  const [model, setModel] = useState(modelOptions[0]?.name);
+  const [modelOptions, setModelOptions ]= useState([
+    // {
+    //   id:"",
+    //   label: "whisper-small",
+    // },
+    // {
+    //   id:"",
+    //   label: "whisper-small-finetuned-on-m01",
+    // },
+  ]);
+  console.log(modelOptions,"modelOptions")
+  const [model, setModel] = useState(null);
   const currentAudioRef = useRef(null);
+
+  const getModelListApi = async () => {
+    try {
+      const response = await axios.get(BASEURL + `get_available_models`,  {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+
+
+      console.log("response",response?.data?.models,response)
+      setModelOptions(response?.data?.models)
+      setModel(response?.data?.models[0])
+      // return response.data;
+    } catch (error) {
+      console.error("Error during API call:", error);
+      throw error;
+    }
+  };
+  useEffect(()=>{
+    getModelListApi()
+  },[])
   const handleAudioPlay = (event) => {
     // If there's already an audio playing, pause it
     if (currentAudioRef.current && currentAudioRef.current !== event.target) {
@@ -453,12 +480,12 @@ function ListingScreen() {
 
     const formData = new FormData();
     if (phraseFile) {
-      formData.append("phrase_text", phraseFile); // Add the phrase text file
+      formData.append("text_file", phraseFile); // Add the phrase text file
     }
     formData.append("audio", newAudioFile);
     formData.append("type", "input");
     formData.append("user_id", userDetails?.user_id);
-    formData.append("model", model);
+    formData.append("model", model?.id);
     try {
       setLoader(true);
       const response = await axios.post(BASEURL + `process_audio`, formData, {
@@ -552,6 +579,7 @@ function ListingScreen() {
       console.error("Error uploading file:", error);
     } finally {
       setLoader(false);
+      fetchData();
       // transcriptionProcessData &&  metaDataApi();
     }
   };
@@ -722,6 +750,7 @@ function ListingScreen() {
         generated_speech_url: output_audio_url?.temp_URL,
         input_audio: input_audio_url?.temp_URL,
         duration: e?.data?.duration,
+        phraseText:e?.data?.phraseText,
         fileName: e?.data?.inputFile,
       });
 
@@ -887,15 +916,30 @@ function ListingScreen() {
 
           <div className="recordSectionContainer">
             <div style={{ width: "60%" }}>
-              <Autocomplete
-                options={modelOptions.map((option) => option.name)} // Extract names
+              {/* <Autocomplete
+                options={modelOptions.map((option) => option.id)} // Extract names
                 value={model}
-                onChange={(event, value) => setModel(value)} // Get the selected value
+                onChange={(event, value,option) => {setModel(value) ;console.log(value,"value", event?.target?.value,option  )}} // Get the selected value
                 renderInput={(params) => (
                   <TextField {...params} label="Select Model" />
                 )}
                 disableClearable
-              />
+              /> */}
+              <Autocomplete
+  options={modelOptions} // Pass the full array of options
+  value={model} // This should hold the selected object, not just a string
+  defaultValue={modelOptions[0]}
+  onChange={(event, value) => {
+    setModel(value); // The whole option object is available as `value`
+    console.log(value, "Selected Option"); // Log the selected option object
+  }}
+  getOptionLabel={(option) => option.label || ""} // Display the label in the dropdown
+  renderInput={(params) => (
+    <TextField {...params} label="Select Model" />
+  )}
+  disableClearable
+/>
+
             </div>
             <div className="childSection">
               <p className="headerSubTitle">What would you like to do?</p>
@@ -1132,6 +1176,30 @@ function ListingScreen() {
               <div className="flexProperties" style={{ justifyContent: "end" }}>
                 <div className="flexProperties modal_text"></div>
               </div>
+              
+             { transcriptionProcessData?.phraseText?.length>0 && <> <div
+                className="flexProperties"
+                style={{ justifyContent: "space-between", marginTop: "25px" }}
+              >
+                <span
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 500,
+                    color: "#646464",
+                  }}
+                >
+                  Phrase Text
+                </span>
+                <span>
+                  <Icon
+                    icon="solar:chat-dots-linear"
+                    style={{ color: "#A7C7FF", fontSize: "20px" }}
+                  ></Icon>
+                </span>
+              </div>
+              <p style={{ fontSize: "20px", fontWeight: 600, margin: 0 }}>
+                {transcriptionProcessData?.phraseText}
+              </p>  </>}
               <div
                 className="flexProperties"
                 style={{ justifyContent: "space-between", marginTop: "25px" }}

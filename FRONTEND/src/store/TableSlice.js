@@ -14,6 +14,16 @@ const initialState = {
     //   }
     // },
     {
+      key: "fileName",
+      label: "File Name",
+      type: "text",
+      subType: "",
+      icon_key: "item_type",
+      customHeaderStyles: {
+        minWidth: "100px"
+      }
+    },
+    {
       key: "inputFile",
       label: "Input File",
       type: "text",
@@ -60,14 +70,14 @@ const initialState = {
      {
       key: "phraseText",
       label: "Phrase Text",
-      type: "text",
+      type: "text", 
       subType: "",
       customHeaderStyles: {
         minWidth: "100px",
       },
       hasIcon: {
         alignment: "right",
-        icon_name: "quill:link-out",
+        // icon_name: "quill:link-out",
         input_file_url: "",
         tooltip: "Click to see Full Transcription",
         styles: {
