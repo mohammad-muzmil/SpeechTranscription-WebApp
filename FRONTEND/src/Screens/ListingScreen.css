@@ -257,19 +257,32 @@
     justify-content: center;
     align-items: center;
 }
+.headerTitle-mobile{
+    display: none;
+}
 
 @media only screen and (max-width: 768px) {
 
 
     .top-section {
-        height: 50%;
+        height: 35rem;
     }
 
     .headerContent {
         width: 85%;
         text-align: center;
     }
-
+    .headerTitle{
+        display: none;
+    }
+    .headerTitle-mobile{
+        font-size: 13px;
+        font-weight: 700;
+        margin-top: 1rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
     /* .headerContent .headerTitle {
         font-size: 26px;
     } */
@@ -290,7 +303,7 @@
     }
 
     .childSection {
-        width: 85%;
+        width: 100%;
     }
 
     .slider {

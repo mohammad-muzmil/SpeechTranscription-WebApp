@@ -60,7 +60,7 @@ function ListingScreen() {
   // const [outputPlayerURL, setOutputPlayerURL] = useState("");
   const [transcriptionProcessData, setTranscriptionProcessData] =
     useState(null);
-    console.log(transcriptionProcessData,"transcriptionProcessData")
+  console.log(transcriptionProcessData, "transcriptionProcessData");
   const [newBodyItem, setNewBodyItem] = useState({});
   const [open, setOpen] = useState(false);
   const [logoutDailog, setLogoutDailog] = useState(false);
@@ -79,7 +79,7 @@ function ListingScreen() {
     setActive(option);
   };
 
-  const [modelOptions, setModelOptions ]= useState([
+  const [modelOptions, setModelOptions] = useState([
     // {
     //   id:"",
     //   label: "whisper-small",
@@ -89,32 +89,30 @@ function ListingScreen() {
     //   label: "whisper-small-finetuned-on-m01",
     // },
   ]);
-  console.log(modelOptions,"modelOptions")
+  console.log(modelOptions, "modelOptions");
   const [model, setModel] = useState(null);
   const currentAudioRef = useRef(null);
 
   const getModelListApi = async () => {
     try {
-      const response = await axios.get(BASEURL + `get_available_models`,  {
+      const response = await axios.get(BASEURL + `get_available_models`, {
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-
-
-      console.log("response",response?.data?.models,response)
-      setModelOptions(response?.data?.models)
-      setModel(response?.data?.models[0])
+      console.log("response", response?.data?.models, response);
+      setModelOptions(response?.data?.models);
+      setModel(response?.data?.models[0]);
       // return response.data;
     } catch (error) {
       console.error("Error during API call:", error);
-      throw error;
+       throw error;
     }
   };
-  useEffect(()=>{
-    getModelListApi()
-  },[])
+  useEffect(() => {
+    getModelListApi();
+  }, []);
   const handleAudioPlay = (event) => {
     // If there's already an audio playing, pause it
     if (currentAudioRef.current && currentAudioRef.current !== event.target) {
@@ -350,8 +348,8 @@ function ListingScreen() {
       });
       return response.data;
     } catch (error) {
-      console.error("Error during API call:", error);
-      throw error;
+      console.log("Error during API call:", error);
+      // throw error;
     }
   };
   // const handleLogin = async () => {
@@ -418,14 +416,14 @@ function ListingScreen() {
       alert("Please upload a phrase text file."); // Ensure a file is uploaded
     }
   };
-  
+
   // Allow user to cancel the phrase text upload even after pressing "Yes"
   const cancelPhraseTextUpload = () => {
     setShowPhraseUploadDialog(false); // Close the dialog
     setPharseFile(null); // Clear uploaded phrase file
     processAudioUpload(file, null); // Proceed with audio upload only
   };
-  
+
   // Handle file input for phrase text
   const handlePhraseFileInput = (event) => {
     const files = event.target.files;
@@ -440,7 +438,7 @@ function ListingScreen() {
     }
   }, []);
   useEffect(() => {
-    if (file && active==="upload") {
+    if (file && active === "upload") {
       setPhraseTextOpen(true);
     }
   }, [file]);
@@ -613,8 +611,8 @@ function ListingScreen() {
       const response = await axios.get(BASEURL + url);
       return response.data; // Return the data from the response
     } catch (error) {
-      console.error("Error posting data:", error);
-      throw error; // Rethrow the error for further handling
+      console.log("Error posting data:", error);
+      // throw error; // Rethrow the error for further handling
     }
   };
   const handleOutputAudio = async () => {
@@ -637,7 +635,7 @@ function ListingScreen() {
       setFile(audio1Blob);
     }
     if (newAudioFile) {
-       await processAudioUpload(newAudioFile); // Proceed with the upload if user is logged in
+      await processAudioUpload(newAudioFile); // Proceed with the upload if user is logged in
     } else {
       alert("Please select an audio file");
     }
@@ -750,7 +748,7 @@ function ListingScreen() {
         generated_speech_url: output_audio_url?.temp_URL,
         input_audio: input_audio_url?.temp_URL,
         duration: e?.data?.duration,
-        phraseText:e?.data?.phraseText,
+        phraseText: e?.data?.phraseText,
         fileName: e?.data?.inputFile,
       });
 
@@ -765,7 +763,7 @@ function ListingScreen() {
   const PhraseTextDialog = () => {
     const handleFileUpload = async (event) => {
       const file = event.target.files[0];
-      setPharseFile(file)
+      setPharseFile(file);
       if (file) {
         try {
           await handlePhraseTextUpload(file); // Call the API with the file directly
@@ -774,7 +772,7 @@ function ListingScreen() {
         }
       }
     };
-  
+
     return (
       <PhraseUploadDialog
         open={showPhraseUploadDialog}
@@ -810,9 +808,7 @@ function ListingScreen() {
       />
     );
   };
-  
-  
-  
+
   return (
     <div className="container">
       <div className="top-section">
@@ -907,7 +903,7 @@ function ListingScreen() {
             </div>
           </Popover>
         </div>
-
+          <p className="headerTitle-mobile">Speech Transcription and Real-Time Processing</p>
         <div className="headerContent">
           {/* <p className="headerTitle">
             Speech Transcription and Real-Time Processing
@@ -926,20 +922,19 @@ function ListingScreen() {
                 disableClearable
               /> */}
               <Autocomplete
-  options={modelOptions} // Pass the full array of options
-  value={model} // This should hold the selected object, not just a string
-  defaultValue={modelOptions[0]}
-  onChange={(event, value) => {
-    setModel(value); // The whole option object is available as `value`
-    console.log(value, "Selected Option"); // Log the selected option object
-  }}
-  getOptionLabel={(option) => option.label || ""} // Display the label in the dropdown
-  renderInput={(params) => (
-    <TextField {...params} label="Select Model" />
-  )}
-  disableClearable
-/>
-
+                options={modelOptions} // Pass the full array of options
+                value={model} // This should hold the selected object, not just a string
+                defaultValue={modelOptions[0]}
+                onChange={(event, value) => {
+                  setModel(value); // The whole option object is available as `value`
+                  console.log(value, "Selected Option"); // Log the selected option object
+                }}
+                getOptionLabel={(option) => option.label || ""} // Display the label in the dropdown
+                renderInput={(params) => (
+                  <TextField {...params} label="Select Model" />
+                )}
+                disableClearable
+              />
             </div>
             <div className="childSection">
               <p className="headerSubTitle">What would you like to do?</p>
@@ -1007,43 +1002,48 @@ function ListingScreen() {
               {active === "upload" ? (
                 // Your component or JSX for the "upload" condition
                 <>
-                <div
-                onDragEnter={preventDefaults}
-                onDragLeave={preventDefaults}
-                onDragOver={preventDefaults}
-                onDrop={handleDrop}
-                className="dropzone"
-              >
-                <span style={{ textAlign: "center" }}>
-                  <div className="uploadIconHolder">
-                    <Icon
-                      icon="solar:cloud-upload-outline"
-                      style={{ fontSize: "65px", color: "#0560FD" }}
-                    />
+                  <div
+                    onDragEnter={preventDefaults}
+                    onDragLeave={preventDefaults}
+                    onDragOver={preventDefaults}
+                    onDrop={handleDrop}
+                    className="dropzone"
+                  >
+                    <span style={{ textAlign: "center" }}>
+                      <div className="uploadIconHolder">
+                        <Icon
+                          icon="solar:cloud-upload-outline"
+                          style={{ fontSize: "65px", color: "#0560FD" }}
+                        />
+                      </div>
+
+                      <div className="uploaderContentSection">
+                        Drag & drop files or{" "}
+                        <label
+                          className="browseButtonStyle"
+                          htmlFor="fileInput"
+                          style={{ cursor: "pointer" }}
+                        >
+                          Browse Audio File
+                        </label>
+                        <input
+                          id="fileInput"
+                          type="file"
+                          onChange={handleFileInputChange}
+                          style={{ display: "none" }}
+                          accept=".wav,.mp3,.m4a,.mp4"
+                        />
+                      </div>
+
+                      <span className="uploaderMutedText">
+                        Limit 50MB per file. Supported formats: .wav, .mp3,
+                        .m4a, .mp4
+                      </span>
+                    </span>
                   </div>
-          
-                  <div className="uploaderContentSection">
-                    Drag & drop files or{" "}
-                    <label className="browseButtonStyle" htmlFor="fileInput" style={{ cursor: "pointer" }}>
-                      Browse Audio File
-                    </label>
-                    <input
-                      id="fileInput"
-                      type="file"
-                      onChange={handleFileInputChange}
-                      style={{ display: "none" }}
-                      accept=".wav,.mp3,.m4a,.mp4"
-                    />
-                  </div>
-          
-                  <span className="uploaderMutedText">
-                    Limit 50MB per file. Supported formats: .wav, .mp3, .m4a, .mp4
-                  </span>
-                </span>
-              </div>
-          
-              {showPhraseUploadDialog && <PhraseTextDialog />}
-              </>
+
+                  {showPhraseUploadDialog && <PhraseTextDialog />}
+                </>
               ) : (
                 <>
                   {/* {isRecording ? ( */}
@@ -1176,30 +1176,38 @@ function ListingScreen() {
               <div className="flexProperties" style={{ justifyContent: "end" }}>
                 <div className="flexProperties modal_text"></div>
               </div>
-              
-             { transcriptionProcessData?.phraseText?.length>0 && <> <div
-                className="flexProperties"
-                style={{ justifyContent: "space-between", marginTop: "25px" }}
-              >
-                <span
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 500,
-                    color: "#646464",
-                  }}
-                >
-                  Phrase Text
-                </span>
-                <span>
-                  <Icon
-                    icon="solar:chat-dots-linear"
-                    style={{ color: "#A7C7FF", fontSize: "20px" }}
-                  ></Icon>
-                </span>
-              </div>
-              <p style={{ fontSize: "20px", fontWeight: 600, margin: 0 }}>
-                {transcriptionProcessData?.phraseText}
-              </p>  </>}
+
+              {transcriptionProcessData?.phraseText?.length > 0 && (
+                <>
+                  {" "}
+                  <div
+                    className="flexProperties"
+                    style={{
+                      justifyContent: "space-between",
+                      marginTop: "25px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: 500,
+                        color: "#646464",
+                      }}
+                    >
+                      Phrase Text
+                    </span>
+                    <span>
+                      <Icon
+                        icon="solar:chat-dots-linear"
+                        style={{ color: "#A7C7FF", fontSize: "20px" }}
+                      ></Icon>
+                    </span>
+                  </div>
+                  <p style={{ fontSize: "20px", fontWeight: 600, margin: 0 }}>
+                    {transcriptionProcessData?.phraseText}
+                  </p>{" "}
+                </>
+              )}
               <div
                 className="flexProperties"
                 style={{ justifyContent: "space-between", marginTop: "25px" }}
