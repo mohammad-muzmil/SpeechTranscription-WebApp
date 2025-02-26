@@ -58,6 +58,16 @@ const initialState = {
         minWidth: "70px",
       },
     },
+    {
+      key: "model_used",
+      label: "Model",
+      type: "text",
+      subType: "",
+      icon_key: "item_type",
+      customHeaderStyles: {
+        minWidth: "100px"
+      }
+    },
     // {
     //   key: "fileType",
     //   label: "File Type",
