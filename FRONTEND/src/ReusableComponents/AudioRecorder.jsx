@@ -30,6 +30,7 @@ const AudioRecorder = ({
     "NewRecording_" + new Date().getTime()
   );
   const [isEditing, setIsEditing] = useState(false);
+  
 
   const handleClose = () => {
     setOpen(!open);
@@ -101,7 +102,8 @@ const AudioRecorder = ({
       };
 
       mediaRecorderRef.current.onstop = async () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const blob = new Blob(chunksRef.current, { type: "audio/mp3" });
+        
         setAudioBlob(blob);
         chunksRef.current = [];
 
